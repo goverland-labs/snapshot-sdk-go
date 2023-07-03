@@ -1,0 +1,36 @@
+query ListVotes($proposal: String!, $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
+    votes (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal: $proposal}) {
+        ... VoteFragment
+    }
+}
+
+fragment SpaceVotingFragment on SpaceVoting {
+    delay
+    period
+    type
+    quorum
+    blind
+    hideAbstain
+    privacy
+    aliased
+}
+
+fragment VoteFragment on Vote {
+    id
+    ipfs
+    voter
+    created
+    space {
+        ... SpaceIdentifierFragment
+    }
+    proposal {
+        ... ProposalIdentifierFragment
+    }
+#    choice ### TODO: Fix Any scalar
+    metadata
+    reason
+    app
+    vp
+    vp_by_strategy
+    vp_state
+}

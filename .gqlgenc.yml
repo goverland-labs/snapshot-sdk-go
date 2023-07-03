@@ -1,0 +1,22 @@
+model:
+  package: client
+  filename: ./client/models_gen.go
+client:
+  package: client
+  filename: ./client/client.go
+models:
+  Int:
+    model: github.com/99designs/gqlgen/graphql.Int64
+  Date:
+    model: github.com/99designs/gqlgen/graphql.Time
+  Any:
+    model: github.com/99designs/gqlgen/graphql.Map
+endpoint:
+  url: https://hub.snapshot.org/graphql
+  headers:
+    x-api-key: "${SNAPSHOT_API_KEY}"
+query:
+  - "./queries/*.graphql" # Where are all the query files located?
+generate:
+  clientV2: true
+  clientInterfaceName: "SnapshotClient"

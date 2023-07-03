@@ -1,0 +1,5 @@
+fragment TreasuryFragment on Treasury {
+    name
+    address
+    network
+}

@@ -1,0 +1,7 @@
+query ListRanking($skip: Int!, $first: Int!) {
+    ranking(skip: $skip, first: $first) {
+        items {
+            ... SpaceIdentifierFragment
+        }
+    }
+}

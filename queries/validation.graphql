@@ -1,0 +1,4 @@
+fragment ValidationFragment on Validation {
+    name
+    params
+}

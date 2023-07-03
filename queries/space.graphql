@@ -1,0 +1,41 @@
+query ListSpaces($skip: Int!, $first: Int!, $ids: [String]) {
+    spaces(skip: $skip, first: $first, where: {id_in: $ids}) {
+        ... SpaceFragment
+    }
+}
+
+query SpaceByID($id: String!) {
+    spaces(where: {id: $id}) {
+        ... SpaceFragment
+    }
+}
+
+fragment SpaceFragment on Space {
+    id
+    name
+    avatar
+    twitter
+    github
+    coingecko
+    symbol
+    domain
+    network
+    categories
+    treasuries {
+        ... TreasuryFragment
+    }
+    followersCount
+    proposalsCount
+    admins
+    rank
+    voting {
+        ... SpaceVotingFragment
+    }
+    strategies {
+        ... StrategyFragment
+    }
+}
+
+fragment SpaceIdentifierFragment on Space {
+    id
+}

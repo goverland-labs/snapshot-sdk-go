@@ -1,0 +1,52 @@
+query ListProposals($skip: Int!, $first: Int!, $spaces: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
+    proposals(skip: $skip, first: $first, where: {space_in: $spaces}, orderBy: $orderBy, orderDirection: $orderDirection) {
+        ... ProposalFragment
+    }
+}
+
+query ProposalByID($id: String!) {
+    proposals(where: {id: $id}) {
+        ... ProposalFragment
+    }
+}
+
+fragment ProposalFragment on Proposal {
+    id
+    ipfs
+    author
+    created
+    network
+    symbol
+    type
+    strategies {
+        ... StrategyFragment
+    }
+    validation {
+        ... ValidationFragment
+    }
+    title
+    body
+    discussion
+    choices
+    start
+    end
+    quorum
+    privacy
+    snapshot
+    state
+    link
+    app
+    scores
+    scores_state
+    scores_total
+    scores_updated
+    votes
+    flagged
+    space {
+        ... SpaceIdentifierFragment
+    }
+}
+
+fragment ProposalIdentifierFragment on Proposal {
+    id
+}

@@ -1,0 +1,5 @@
+fragment StrategyFragment on Strategy {
+    name
+    network
+    params
+}
