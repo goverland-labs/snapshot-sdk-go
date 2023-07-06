@@ -1,0 +1,9 @@
+query ListNetworks {
+    networks {
+        ... NetworkFragment
+    }
+}
+
+fragment NetworkFragment on Item {
+    id
+}

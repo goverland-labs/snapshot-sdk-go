@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
 
@@ -33,6 +34,7 @@ type ListProposalOptions struct {
 	OrderBy        string
 	OrderDirection client.OrderDirection
 	interceptors   []clientv2.RequestInterceptor
+	CreatedAfter   *time.Time
 }
 
 type ListProposalOption interface {
@@ -77,6 +79,20 @@ type ListProposalWithSpacesFilter struct {
 	SpaceIDs []string
 }
 
+type ListProposalCreatedAfterOption struct {
+	After time.Time
+}
+
+func ListProposalCreatedAfter(t time.Time) ListProposalCreatedAfterOption {
+	return ListProposalCreatedAfterOption{
+		After: t,
+	}
+}
+
+func (o ListProposalCreatedAfterOption) Apply(options *ListProposalOptions) {
+	options.CreatedAfter = &o.After
+}
+
 func ListProposalWithSpaces(id ...string) ListProposalWithSpacesFilter {
 	return ListProposalWithSpacesFilter{
 		SpaceIDs: id,
@@ -106,24 +122,30 @@ func (s *SDK) ListProposal(ctx context.Context, opts ...ListProposalOption) ([]*
 		opt.Apply(&options)
 	}
 
-	list, err := s.client.ListProposals(
+	var createdAfter int64
+	if options.CreatedAfter != nil {
+		createdAfter = options.CreatedAfter.Unix()
+	}
+
+	list, err := wrapError(s.client.ListProposals(
 		ctx,
 		int64(options.Offset),
 		int64(options.Limit),
+		createdAfter,
 		options.SpaceIDs,
 		options.OrderBy,
 		options.OrderDirection,
 		options.interceptors...,
-	)
+	))
 	if err != nil {
-		return nil, err
+		return list.GetProposals(), err
 	}
 
 	return list.GetProposals(), nil
 }
 
 func (s *SDK) GetProposalByID(ctx context.Context, id string, opts ...clientv2.RequestInterceptor) (*client.ProposalFragment, error) {
-	resp, err := s.client.ProposalByID(ctx, id, opts...)
+	resp, err := wrapError(s.client.ProposalByID(ctx, id, opts...))
 	if err != nil {
 		return nil, err
 	}

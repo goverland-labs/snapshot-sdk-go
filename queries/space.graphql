@@ -13,21 +13,36 @@ query SpaceByID($id: String!) {
 fragment SpaceFragment on Space {
     id
     name
+    private
+    about
     avatar
+    terms
+    location
+    website
     twitter
     github
     coingecko
-    symbol
-    domain
+    email
     network
+    symbol
+    skin
+    domain
+    activeProposals
+    proposalsCount
+    followersCount
+    votesCount
+    guidelines
+    template
+    verified
+    flagged
+    rank
+    admins
+    members
+    moderators
     categories
     treasuries {
         ... TreasuryFragment
     }
-    followersCount
-    proposalsCount
-    admins
-    rank
     voting {
         ... SpaceVotingFragment
     }

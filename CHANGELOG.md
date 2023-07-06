@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Added
+- Added query for fetching networks
+- Added parameter network for fetching ranked space identifier
+- Added additional fields for spaces
+
 ## [0.1.0] - 2023-07-03
 
 ### Added

@@ -1,5 +1,5 @@
-query ListRanking($skip: Int!, $first: Int!) {
-    ranking(skip: $skip, first: $first) {
+query ListRanking($skip: Int!, $first: Int!, $category: String!, $network: String!) {
+    ranking(skip: $skip, first: $first, where: {category: $category, network: $network}) {
         items {
             ... SpaceIdentifierFragment
         }

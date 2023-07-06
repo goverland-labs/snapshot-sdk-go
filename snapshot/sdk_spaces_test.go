@@ -41,4 +41,18 @@ func TestGettingSpaces(t *testing.T) {
 		convey.So(space, convey.ShouldNotBeNil)
 		convey.So(space.ID, convey.ShouldEqual, "stgdao.eth")
 	})
+
+	convey.Convey("get ranked list", t, func() {
+		ids, err := sdk.GetRanking(context.Background(), RankingWithPagination(20, 0))
+
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ids, convey.ShouldHaveLength, 20)
+	})
+
+	convey.Convey("get ranked list by network", t, func() {
+		ids, err := sdk.GetRanking(context.Background(), RankingWithNetwork("1"))
+
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ids, convey.ShouldHaveLength, 20)
+	})
 }

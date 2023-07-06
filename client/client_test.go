@@ -18,7 +18,7 @@ func TestClient(t *testing.T) {
 	c := NewClient(http.DefaultClient, snapshotHub, nil)
 
 	convey.Convey("ListRanking", t, func() {
-		list, err := c.ListRanking(context.Background(), 0, 20)
+		list, err := c.ListRanking(context.Background(), 0, 20, "grant", "1")
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list.GetRanking().GetItems(), convey.ShouldHaveLength, 20)
@@ -40,14 +40,14 @@ func TestClient(t *testing.T) {
 	})
 
 	convey.Convey("ListProposals", t, func() {
-		list, err := c.ListProposals(context.Background(), 0, 10, nil, "created", OrderDirectionDesc)
+		list, err := c.ListProposals(context.Background(), 0, 10, 0, nil, "created", OrderDirectionDesc)
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list.GetProposals(), convey.ShouldHaveLength, 10)
 	})
 
 	convey.Convey("ListProposals filtered by spaces", t, func() {
-		list, err := c.ListProposals(context.Background(), 0, 10, []*string{helpers.Ptr("stgdao.eth")}, "created", OrderDirectionDesc)
+		list, err := c.ListProposals(context.Background(), 0, 10, 0, []*string{helpers.Ptr("stgdao.eth")}, "created", OrderDirectionDesc)
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list.GetProposals(), convey.ShouldHaveLength, 10)
@@ -82,6 +82,6 @@ func TestAnyUnmarshal(t *testing.T) {
 		convey.So(strategies[0].Name, convey.ShouldEqual, "eth-balance")
 		convey.So(strategies[0].Network, convey.ShouldNotBeNil)
 		convey.So(*strategies[0].Network, convey.ShouldEqual, "1")
-		//convey.So(strategies[0].Params["symbol"], convey.ShouldEqual, "ETH")
+		convey.So(strategies[0].Params["symbol"], convey.ShouldEqual, "ETH")
 	})
 }

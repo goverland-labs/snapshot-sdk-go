@@ -10,9 +10,10 @@ import (
 )
 
 type SnapshotClient interface {
-	ListProposals(ctx context.Context, skip int64, first int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error)
+	ListNetworks(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNetworks, error)
+	ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error)
 	ProposalByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*ProposalByID, error)
-	ListRanking(ctx context.Context, skip int64, first int64, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error)
+	ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error)
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
 	ListVotes(ctx context.Context, proposal string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
@@ -50,6 +51,17 @@ type Query struct {
 	Vp            *Vp             "json:\"vp,omitempty\" graphql:\"vp\""
 	Messages      []*Message      "json:\"messages,omitempty\" graphql:\"messages\""
 }
+type NetworkFragment struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *NetworkFragment) GetID() string {
+	if t == nil {
+		t = &NetworkFragment{}
+	}
+	return t.ID
+}
+
 type ProposalFragment struct {
 	ID            string                   "json:\"id\" graphql:\"id\""
 	Ipfs          *string                  "json:\"ipfs,omitempty\" graphql:\"ipfs\""
@@ -262,23 +274,38 @@ func (t *ProposalIdentifierFragment) GetID() string {
 }
 
 type SpaceFragment struct {
-	ID             string               "json:\"id\" graphql:\"id\""
-	Name           *string              "json:\"name,omitempty\" graphql:\"name\""
-	Avatar         *string              "json:\"avatar,omitempty\" graphql:\"avatar\""
-	Twitter        *string              "json:\"twitter,omitempty\" graphql:\"twitter\""
-	Github         *string              "json:\"github,omitempty\" graphql:\"github\""
-	Coingecko      *string              "json:\"coingecko,omitempty\" graphql:\"coingecko\""
-	Symbol         *string              "json:\"symbol,omitempty\" graphql:\"symbol\""
-	Domain         *string              "json:\"domain,omitempty\" graphql:\"domain\""
-	Network        *string              "json:\"network,omitempty\" graphql:\"network\""
-	Categories     []*string            "json:\"categories,omitempty\" graphql:\"categories\""
-	Treasuries     []*TreasuryFragment  "json:\"treasuries,omitempty\" graphql:\"treasuries\""
-	FollowersCount *int64               "json:\"followersCount,omitempty\" graphql:\"followersCount\""
-	ProposalsCount *int64               "json:\"proposalsCount,omitempty\" graphql:\"proposalsCount\""
-	Admins         []*string            "json:\"admins,omitempty\" graphql:\"admins\""
-	Rank           *float64             "json:\"rank,omitempty\" graphql:\"rank\""
-	Voting         *SpaceVotingFragment "json:\"voting,omitempty\" graphql:\"voting\""
-	Strategies     []*StrategyFragment  "json:\"strategies,omitempty\" graphql:\"strategies\""
+	ID              string               "json:\"id\" graphql:\"id\""
+	Name            *string              "json:\"name,omitempty\" graphql:\"name\""
+	Private         *bool                "json:\"private,omitempty\" graphql:\"private\""
+	About           *string              "json:\"about,omitempty\" graphql:\"about\""
+	Avatar          *string              "json:\"avatar,omitempty\" graphql:\"avatar\""
+	Terms           *string              "json:\"terms,omitempty\" graphql:\"terms\""
+	Location        *string              "json:\"location,omitempty\" graphql:\"location\""
+	Website         *string              "json:\"website,omitempty\" graphql:\"website\""
+	Twitter         *string              "json:\"twitter,omitempty\" graphql:\"twitter\""
+	Github          *string              "json:\"github,omitempty\" graphql:\"github\""
+	Coingecko       *string              "json:\"coingecko,omitempty\" graphql:\"coingecko\""
+	Email           *string              "json:\"email,omitempty\" graphql:\"email\""
+	Network         *string              "json:\"network,omitempty\" graphql:\"network\""
+	Symbol          *string              "json:\"symbol,omitempty\" graphql:\"symbol\""
+	Skin            *string              "json:\"skin,omitempty\" graphql:\"skin\""
+	Domain          *string              "json:\"domain,omitempty\" graphql:\"domain\""
+	ActiveProposals *int64               "json:\"activeProposals,omitempty\" graphql:\"activeProposals\""
+	ProposalsCount  *int64               "json:\"proposalsCount,omitempty\" graphql:\"proposalsCount\""
+	FollowersCount  *int64               "json:\"followersCount,omitempty\" graphql:\"followersCount\""
+	VotesCount      *int64               "json:\"votesCount,omitempty\" graphql:\"votesCount\""
+	Guidelines      *string              "json:\"guidelines,omitempty\" graphql:\"guidelines\""
+	Template        *string              "json:\"template,omitempty\" graphql:\"template\""
+	Verified        *bool                "json:\"verified,omitempty\" graphql:\"verified\""
+	Flagged         *bool                "json:\"flagged,omitempty\" graphql:\"flagged\""
+	Rank            *float64             "json:\"rank,omitempty\" graphql:\"rank\""
+	Admins          []*string            "json:\"admins,omitempty\" graphql:\"admins\""
+	Members         []*string            "json:\"members,omitempty\" graphql:\"members\""
+	Moderators      []*string            "json:\"moderators,omitempty\" graphql:\"moderators\""
+	Categories      []*string            "json:\"categories,omitempty\" graphql:\"categories\""
+	Treasuries      []*TreasuryFragment  "json:\"treasuries,omitempty\" graphql:\"treasuries\""
+	Voting          *SpaceVotingFragment "json:\"voting,omitempty\" graphql:\"voting\""
+	Strategies      []*StrategyFragment  "json:\"strategies,omitempty\" graphql:\"strategies\""
 }
 
 func (t *SpaceFragment) GetID() string {
@@ -293,11 +320,41 @@ func (t *SpaceFragment) GetName() *string {
 	}
 	return t.Name
 }
+func (t *SpaceFragment) GetPrivate() *bool {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Private
+}
+func (t *SpaceFragment) GetAbout() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.About
+}
 func (t *SpaceFragment) GetAvatar() *string {
 	if t == nil {
 		t = &SpaceFragment{}
 	}
 	return t.Avatar
+}
+func (t *SpaceFragment) GetTerms() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Terms
+}
+func (t *SpaceFragment) GetLocation() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Location
+}
+func (t *SpaceFragment) GetWebsite() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Website
 }
 func (t *SpaceFragment) GetTwitter() *string {
 	if t == nil {
@@ -317,11 +374,29 @@ func (t *SpaceFragment) GetCoingecko() *string {
 	}
 	return t.Coingecko
 }
+func (t *SpaceFragment) GetEmail() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Email
+}
+func (t *SpaceFragment) GetNetwork() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Network
+}
 func (t *SpaceFragment) GetSymbol() *string {
 	if t == nil {
 		t = &SpaceFragment{}
 	}
 	return t.Symbol
+}
+func (t *SpaceFragment) GetSkin() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Skin
 }
 func (t *SpaceFragment) GetDomain() *string {
 	if t == nil {
@@ -329,11 +404,77 @@ func (t *SpaceFragment) GetDomain() *string {
 	}
 	return t.Domain
 }
-func (t *SpaceFragment) GetNetwork() *string {
+func (t *SpaceFragment) GetActiveProposals() *int64 {
 	if t == nil {
 		t = &SpaceFragment{}
 	}
-	return t.Network
+	return t.ActiveProposals
+}
+func (t *SpaceFragment) GetProposalsCount() *int64 {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.ProposalsCount
+}
+func (t *SpaceFragment) GetFollowersCount() *int64 {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.FollowersCount
+}
+func (t *SpaceFragment) GetVotesCount() *int64 {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.VotesCount
+}
+func (t *SpaceFragment) GetGuidelines() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Guidelines
+}
+func (t *SpaceFragment) GetTemplate() *string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Template
+}
+func (t *SpaceFragment) GetVerified() *bool {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Verified
+}
+func (t *SpaceFragment) GetFlagged() *bool {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Flagged
+}
+func (t *SpaceFragment) GetRank() *float64 {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Rank
+}
+func (t *SpaceFragment) GetAdmins() []*string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Admins
+}
+func (t *SpaceFragment) GetMembers() []*string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Members
+}
+func (t *SpaceFragment) GetModerators() []*string {
+	if t == nil {
+		t = &SpaceFragment{}
+	}
+	return t.Moderators
 }
 func (t *SpaceFragment) GetCategories() []*string {
 	if t == nil {
@@ -346,30 +487,6 @@ func (t *SpaceFragment) GetTreasuries() []*TreasuryFragment {
 		t = &SpaceFragment{}
 	}
 	return t.Treasuries
-}
-func (t *SpaceFragment) GetFollowersCount() *int64 {
-	if t == nil {
-		t = &SpaceFragment{}
-	}
-	return t.FollowersCount
-}
-func (t *SpaceFragment) GetProposalsCount() *int64 {
-	if t == nil {
-		t = &SpaceFragment{}
-	}
-	return t.ProposalsCount
-}
-func (t *SpaceFragment) GetAdmins() []*string {
-	if t == nil {
-		t = &SpaceFragment{}
-	}
-	return t.Admins
-}
-func (t *SpaceFragment) GetRank() *float64 {
-	if t == nil {
-		t = &SpaceFragment{}
-	}
-	return t.Rank
 }
 func (t *SpaceFragment) GetVoting() *SpaceVotingFragment {
 	if t == nil {
@@ -622,6 +739,17 @@ func (t *ListRanking_Ranking) GetItems() []*SpaceIdentifierFragment {
 	return t.Items
 }
 
+type ListNetworks struct {
+	Networks []*NetworkFragment "json:\"networks,omitempty\" graphql:\"networks\""
+}
+
+func (t *ListNetworks) GetNetworks() []*NetworkFragment {
+	if t == nil {
+		t = &ListNetworks{}
+	}
+	return t.Networks
+}
+
 type ListProposals struct {
 	Proposals []*ProposalFragment "json:\"proposals,omitempty\" graphql:\"proposals\""
 }
@@ -688,8 +816,29 @@ func (t *ListVotes) GetVotes() []*VoteFragment {
 	return t.Votes
 }
 
-const ListProposalsDocument = `query ListProposals ($skip: Int!, $first: Int!, $spaces: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
-	proposals(skip: $skip, first: $first, where: {space_in:$spaces}, orderBy: $orderBy, orderDirection: $orderDirection) {
+const ListNetworksDocument = `query ListNetworks {
+	networks {
+		... NetworkFragment
+	}
+}
+fragment NetworkFragment on Item {
+	id
+}
+`
+
+func (c *Client) ListNetworks(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNetworks, error) {
+	vars := map[string]interface{}{}
+
+	var res ListNetworks
+	if err := c.Client.Post(ctx, "ListNetworks", ListNetworksDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListProposalsDocument = `query ListProposals ($skip: Int!, $first: Int!, $createdAfter: Int!, $spaces: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
+	proposals(skip: $skip, first: $first, where: {space_in:$spaces,created_gte:$createdAfter}, orderBy: $orderBy, orderDirection: $orderDirection) {
 		... ProposalFragment
 	}
 }
@@ -743,10 +892,11 @@ fragment SpaceIdentifierFragment on Space {
 }
 `
 
-func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error) {
+func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error) {
 	vars := map[string]interface{}{
 		"skip":           skip,
 		"first":          first,
+		"createdAfter":   createdAfter,
 		"spaces":         spaces,
 		"orderBy":        orderBy,
 		"orderDirection": orderDirection,
@@ -828,8 +978,8 @@ func (c *Client) ProposalByID(ctx context.Context, id string, interceptors ...cl
 	return &res, nil
 }
 
-const ListRankingDocument = `query ListRanking ($skip: Int!, $first: Int!) {
-	ranking(skip: $skip, first: $first) {
+const ListRankingDocument = `query ListRanking ($skip: Int!, $first: Int!, $category: String!, $network: String!) {
+	ranking(skip: $skip, first: $first, where: {category:$category,network:$network}) {
 		items {
 			... SpaceIdentifierFragment
 		}
@@ -840,10 +990,12 @@ fragment SpaceIdentifierFragment on Space {
 }
 `
 
-func (c *Client) ListRanking(ctx context.Context, skip int64, first int64, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error) {
+func (c *Client) ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error) {
 	vars := map[string]interface{}{
-		"skip":  skip,
-		"first": first,
+		"skip":     skip,
+		"first":    first,
+		"category": category,
+		"network":  network,
 	}
 
 	var res ListRanking
@@ -862,21 +1014,36 @@ const ListSpacesDocument = `query ListSpaces ($skip: Int!, $first: Int!, $ids: [
 fragment SpaceFragment on Space {
 	id
 	name
+	private
+	about
 	avatar
+	terms
+	location
+	website
 	twitter
 	github
 	coingecko
-	symbol
-	domain
+	email
 	network
+	symbol
+	skin
+	domain
+	activeProposals
+	proposalsCount
+	followersCount
+	votesCount
+	guidelines
+	template
+	verified
+	flagged
+	rank
+	admins
+	members
+	moderators
 	categories
 	treasuries {
 		... TreasuryFragment
 	}
-	followersCount
-	proposalsCount
-	admins
-	rank
 	voting {
 		... SpaceVotingFragment
 	}
@@ -929,21 +1096,36 @@ const SpaceByIDDocument = `query SpaceByID ($id: String!) {
 fragment SpaceFragment on Space {
 	id
 	name
+	private
+	about
 	avatar
+	terms
+	location
+	website
 	twitter
 	github
 	coingecko
-	symbol
-	domain
+	email
 	network
+	symbol
+	skin
+	domain
+	activeProposals
+	proposalsCount
+	followersCount
+	votesCount
+	guidelines
+	template
+	verified
+	flagged
+	rank
+	admins
+	members
+	moderators
 	categories
 	treasuries {
 		... TreasuryFragment
 	}
-	followersCount
-	proposalsCount
-	admins
-	rank
 	voting {
 		... SpaceVotingFragment
 	}
