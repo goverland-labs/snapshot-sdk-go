@@ -1,5 +1,5 @@
-query ListVotes($proposal: String!, $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
-    votes (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal: $proposal}) {
+query ListVotes($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
+    votes (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in: $proposals}) {
         ... VoteFragment
     }
 }
@@ -26,7 +26,7 @@ fragment VoteFragment on Vote {
     proposal {
         ... ProposalIdentifierFragment
     }
-#    choice ### TODO: Fix Any scalar
+    choice ### TODO: Fix Any scalar
     metadata
     reason
     app

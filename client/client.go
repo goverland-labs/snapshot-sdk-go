@@ -11,12 +11,12 @@ import (
 
 type SnapshotClient interface {
 	ListNetworks(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNetworks, error)
-	ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error)
+	ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, ids []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error)
 	ProposalByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*ProposalByID, error)
 	ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error)
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
-	ListVotes(ctx context.Context, proposal string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
+	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
 }
 
 type Client struct {
@@ -647,6 +647,7 @@ type VoteFragment struct {
 	Created      int64                       "json:\"created\" graphql:\"created\""
 	Space        *SpaceIdentifierFragment    "json:\"space\" graphql:\"space\""
 	Proposal     *ProposalIdentifierFragment "json:\"proposal,omitempty\" graphql:\"proposal\""
+	Choice       interface{}                 "json:\"choice\" graphql:\"choice\""
 	Metadata     map[string]interface{}      "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Reason       *string                     "json:\"reason,omitempty\" graphql:\"reason\""
 	App          *string                     "json:\"app,omitempty\" graphql:\"app\""
@@ -690,6 +691,12 @@ func (t *VoteFragment) GetProposal() *ProposalIdentifierFragment {
 		t = &VoteFragment{}
 	}
 	return t.Proposal
+}
+func (t *VoteFragment) GetChoice() interface{} {
+	if t == nil {
+		t = &VoteFragment{}
+	}
+	return t.Choice
 }
 func (t *VoteFragment) GetMetadata() map[string]interface{} {
 	if t == nil {
@@ -837,8 +844,8 @@ func (c *Client) ListNetworks(ctx context.Context, interceptors ...clientv2.Requ
 	return &res, nil
 }
 
-const ListProposalsDocument = `query ListProposals ($skip: Int!, $first: Int!, $createdAfter: Int!, $spaces: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
-	proposals(skip: $skip, first: $first, where: {space_in:$spaces,created_gte:$createdAfter}, orderBy: $orderBy, orderDirection: $orderDirection) {
+const ListProposalsDocument = `query ListProposals ($skip: Int!, $first: Int!, $createdAfter: Int!, $spaces: [String], $ids: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
+	proposals(skip: $skip, first: $first, where: {space_in:$spaces,id_in:$ids,created_gte:$createdAfter}, orderBy: $orderBy, orderDirection: $orderDirection) {
 		... ProposalFragment
 	}
 }
@@ -892,12 +899,13 @@ fragment SpaceIdentifierFragment on Space {
 }
 `
 
-func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error) {
+func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, ids []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error) {
 	vars := map[string]interface{}{
 		"skip":           skip,
 		"first":          first,
 		"createdAfter":   createdAfter,
 		"spaces":         spaces,
+		"ids":            ids,
 		"orderBy":        orderBy,
 		"orderDirection": orderDirection,
 	}
@@ -1168,8 +1176,8 @@ func (c *Client) SpaceByID(ctx context.Context, id string, interceptors ...clien
 	return &res, nil
 }
 
-const ListVotesDocument = `query ListVotes ($proposal: String!, $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
-	votes(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal:$proposal}) {
+const ListVotesDocument = `query ListVotes ($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
+	votes(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in:$proposals}) {
 		... VoteFragment
 	}
 }
@@ -1184,6 +1192,7 @@ fragment VoteFragment on Vote {
 	proposal {
 		... ProposalIdentifierFragment
 	}
+	choice
 	metadata
 	reason
 	app
@@ -1199,9 +1208,9 @@ fragment ProposalIdentifierFragment on Proposal {
 }
 `
 
-func (c *Client) ListVotes(ctx context.Context, proposal string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error) {
+func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error) {
 	vars := map[string]interface{}{
-		"proposal":       proposal,
+		"proposals":      proposals,
 		"skip":           skip,
 		"first":          first,
 		"orderBy":        orderBy,

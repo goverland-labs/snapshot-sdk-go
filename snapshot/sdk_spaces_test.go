@@ -19,7 +19,7 @@ func TestGettingSpaces(t *testing.T) {
 	})
 
 	convey.Convey("list spaces by IDs", t, func() {
-		list, err := sdk.ListSpace(context.Background(), ListSpaceWithIDs("stgdao.eth", "safe.eth"))
+		list, err := sdk.ListSpace(context.Background(), ListSpaceWithIDFilter("stgdao.eth", "safe.eth"))
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list, convey.ShouldNotBeNil)

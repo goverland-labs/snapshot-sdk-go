@@ -20,13 +20,29 @@ func TestGettingNetworks(t *testing.T) {
 	convey.Convey("list proposals by space IDs", t, func() {
 		list, err := sdk.ListProposal(
 			context.Background(),
-			ListProposalWithSpaces("stgdao.eth", "safe.eth"),
+			ListProposalWithSpacesFilter("stgdao.eth", "safe.eth"),
 			ListProposalWithPagination(10, 0),
 		)
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list, convey.ShouldNotBeNil)
 		convey.So(list, convey.ShouldHaveLength, 10)
+	})
+
+	convey.Convey("list proposals by IDs", t, func() {
+		list, err := sdk.ListProposal(
+			context.Background(),
+			ListProposalWithIDFilter(
+				"QmRS9FH4qBCAt7LaUrTGcbiLGo9zaSzRw5NnUdcwaMKWVo",
+				"QmRwFUM2or1cQPK4Vm3RPqHmpuCU4v2LwfAg2NW9emwtSx",
+				"QmUsZPqoNAPcoZroumEDWU5vyub5rnWk24KrE2dP9SgDSw",
+				"QmRvnAHqcLWyhuKiYw8zbYdhtFYzREmxhfRRvne3ZHgoww",
+			),
+		)
+
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(list, convey.ShouldNotBeNil)
+		convey.So(list, convey.ShouldHaveLength, 4)
 	})
 
 	convey.Convey("get proposal by id", t, func() {

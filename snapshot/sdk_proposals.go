@@ -29,33 +29,27 @@ var defaultListProposalOptions = ListProposalOptions{
 
 type ListProposalOptions struct {
 	SpaceIDs       []*string
+	IDs            []*string
 	Limit          int
 	Offset         int
 	OrderBy        string
 	OrderDirection client.OrderDirection
 	interceptors   []clientv2.RequestInterceptor
-	CreatedAfter   *time.Time
+	CreatedAfter   int64
 }
 
-type ListProposalOption interface {
-	Apply(options *ListProposalOptions)
-}
+type ListProposalOption func(*ListProposalOptions)
 
 type ListProposalPagination struct {
 	Limit  int
 	Offset int
 }
 
-func ListProposalWithPagination(limit, offset int) ListProposalPagination {
-	return ListProposalPagination{
-		Limit:  limit,
-		Offset: offset,
+func ListProposalWithPagination(limit, offset int) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		options.Limit = limit
+		options.Offset = offset
 	}
-}
-
-func (o ListProposalPagination) Apply(options *ListProposalOptions) {
-	options.Limit = o.Limit
-	options.Offset = o.Offset
 }
 
 type ListProposalOrderBy struct {
@@ -63,76 +57,63 @@ type ListProposalOrderBy struct {
 	OrderDirection client.OrderDirection
 }
 
-func ListProposalWithOrderBy(orderBy string, orderDirection client.OrderDirection) ListProposalOrderBy {
-	return ListProposalOrderBy{
-		OrderBy:        orderBy,
-		OrderDirection: orderDirection,
+func ListProposalWithOrderBy(orderBy string, orderDirection client.OrderDirection) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		options.OrderBy = orderBy
+		options.OrderDirection = orderDirection
 	}
 }
 
-func (o ListProposalOrderBy) Apply(options *ListProposalOptions) {
-	options.OrderBy = o.OrderBy
-	options.OrderDirection = o.OrderDirection
-}
+func ListProposalWithSpacesFilter(spaceID ...string) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		ids := make([]*string, 0, len(spaceID))
+		for _, id := range spaceID {
+			ids = append(ids, helpers.Ptr(id))
+		}
 
-type ListProposalWithSpacesFilter struct {
-	SpaceIDs []string
-}
-
-type ListProposalCreatedAfterOption struct {
-	After time.Time
-}
-
-func ListProposalCreatedAfter(t time.Time) ListProposalCreatedAfterOption {
-	return ListProposalCreatedAfterOption{
-		After: t,
+		options.SpaceIDs = ids
 	}
 }
 
-func (o ListProposalCreatedAfterOption) Apply(options *ListProposalOptions) {
-	options.CreatedAfter = &o.After
-}
+func ListProposalWithIDFilter(proposalID ...string) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		ids := make([]*string, 0, len(proposalID))
+		for _, id := range proposalID {
+			ids = append(ids, helpers.Ptr(id))
+		}
 
-func ListProposalWithSpaces(id ...string) ListProposalWithSpacesFilter {
-	return ListProposalWithSpacesFilter{
-		SpaceIDs: id,
+		options.IDs = ids
 	}
 }
 
-func (o ListProposalWithSpacesFilter) Apply(options *ListProposalOptions) {
-	ids := make([]*string, 0, len(o.SpaceIDs))
-	for _, id := range o.SpaceIDs {
-		ids = append(ids, helpers.Ptr(id))
+func ListProposalCreatedAfter(t time.Time) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		options.CreatedAfter = 0
+		if !t.IsZero() {
+			options.CreatedAfter = t.Unix()
+		}
 	}
-
-	options.SpaceIDs = ids
 }
 
-type ListProposalInterceptors struct {
-	Interceptors []clientv2.RequestInterceptor
-}
-
-func (o ListProposalInterceptors) Apply(options *ListProposalOptions) {
-	options.interceptors = o.Interceptors
+func ListProposalWithInterceptors(interceptors []clientv2.RequestInterceptor) ListProposalOption {
+	return func(options *ListProposalOptions) {
+		options.interceptors = interceptors
+	}
 }
 
 func (s *SDK) ListProposal(ctx context.Context, opts ...ListProposalOption) ([]*client.ProposalFragment, error) {
 	options := defaultListProposalOptions
 	for _, opt := range opts {
-		opt.Apply(&options)
-	}
-
-	var createdAfter int64
-	if options.CreatedAfter != nil {
-		createdAfter = options.CreatedAfter.Unix()
+		opt(&options)
 	}
 
 	list, err := wrapError(s.client.ListProposals(
 		ctx,
 		int64(options.Offset),
 		int64(options.Limit),
-		createdAfter,
+		options.CreatedAfter,
 		options.SpaceIDs,
+		options.IDs,
 		options.OrderBy,
 		options.OrderDirection,
 		options.interceptors...,

@@ -1,5 +1,5 @@
-query ListProposals($skip: Int!, $first: Int!, $createdAfter: Int!, $spaces: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
-    proposals(skip: $skip, first: $first, where: {space_in: $spaces, created_gte: $createdAfter}, orderBy: $orderBy, orderDirection: $orderDirection) {
+query ListProposals($skip: Int!, $first: Int!, $createdAfter: Int!, $spaces: [String], $ids: [String], $orderBy: String!, $orderDirection: OrderDirection!) {
+    proposals(skip: $skip, first: $first, where: {space_in: $spaces, id_in: $ids, created_gte: $createdAfter}, orderBy: $orderBy, orderDirection: $orderDirection) {
         ... ProposalFragment
     }
 }

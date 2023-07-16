@@ -13,38 +13,28 @@ type Options struct {
 	options      *clientv2.Options
 }
 
-type Option interface {
-	Apply(opts *Options)
+type Option func(opts *Options)
+
+func WithBaseURL(baseURL string) Option {
+	return func(opts *Options) {
+		opts.baseURL = baseURL
+	}
 }
 
-type WithBaseURL struct {
-	BaseURL string
+func WithInterceptors(interceptors []clientv2.RequestInterceptor) Option {
+	return func(opts *Options) {
+		opts.interceptors = interceptors
+	}
 }
 
-func (o WithBaseURL) Apply(options *Options) {
-	options.baseURL = o.BaseURL
+func WithHTTPClient(client *http.Client) Option {
+	return func(opts *Options) {
+		opts.httpClient = client
+	}
 }
 
-type WithInterceptors struct {
-	Interceptors []clientv2.RequestInterceptor
-}
-
-func (o WithInterceptors) Apply(options *Options) {
-	options.interceptors = o.Interceptors
-}
-
-type WithHTTPClient struct {
-	Client *http.Client
-}
-
-func (o WithHTTPClient) Apply(options *Options) {
-	options.httpClient = o.Client
-}
-
-type WithOptions struct {
-	Options *clientv2.Options
-}
-
-func (o WithOptions) Apply(options *Options) {
-	options.options = o.Options
+func WithOptions(options *clientv2.Options) Option {
+	return func(opts *Options) {
+		opts.options = options
+	}
 }

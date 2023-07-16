@@ -21,7 +21,7 @@ func TestGettingProposals(t *testing.T) {
 	convey.Convey("list proposals by space IDs", t, func() {
 		list, err := sdk.ListProposal(
 			context.Background(),
-			ListProposalWithSpaces("stgdao.eth", "safe.eth"),
+			ListProposalWithSpacesFilter("stgdao.eth", "safe.eth"),
 			ListProposalWithPagination(10, 0),
 		)
 

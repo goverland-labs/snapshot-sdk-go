@@ -15,7 +15,7 @@ type SDK struct {
 func NewSDK(opts ...Option) *SDK {
 	options := Options{}
 	for _, opt := range opts {
-		opt.Apply(&options)
+		opt(&options)
 	}
 
 	if options.baseURL == "" {

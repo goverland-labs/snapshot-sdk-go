@@ -33,52 +33,30 @@ type ListSpaceOptions struct {
 	interceptors []clientv2.RequestInterceptor
 }
 
-type ListSpaceOption interface {
-	Apply(options *ListSpaceOptions)
-}
+type ListSpaceOption func(options *ListSpaceOptions)
 
-type ListSpacePagination struct {
-	Limit  int
-	Offset int
-}
-
-func ListSpaceWithPagination(limit, offset int) ListSpacePagination {
-	return ListSpacePagination{
-		Limit:  limit,
-		Offset: offset,
+func ListSpaceWithPagination(limit, offset int) ListSpaceOption {
+	return func(options *ListSpaceOptions) {
+		options.Limit = limit
+		options.Offset = offset
 	}
 }
 
-func (o ListSpacePagination) Apply(options *ListSpaceOptions) {
-	options.Limit = o.Limit
-	options.Offset = o.Offset
-}
+func ListSpaceWithIDFilter(spaceID ...string) ListSpaceOption {
+	return func(options *ListSpaceOptions) {
+		ids := make([]*string, 0, len(spaceID))
+		for _, id := range spaceID {
+			ids = append(ids, helpers.Ptr(id))
+		}
 
-type ListSpaceIDs struct {
-	IDs []string
-}
-
-func ListSpaceWithIDs(id ...string) ListSpaceIDs {
-	return ListSpaceIDs{
-		IDs: id,
+		options.IDs = ids
 	}
 }
 
-func (o ListSpaceIDs) Apply(options *ListSpaceOptions) {
-	ids := make([]*string, 0, len(o.IDs))
-	for _, id := range o.IDs {
-		ids = append(ids, helpers.Ptr(id))
+func ListSpaceWithInterceptors(interceptors []clientv2.RequestInterceptor) ListSpaceOption {
+	return func(options *ListSpaceOptions) {
+		options.interceptors = interceptors
 	}
-
-	options.IDs = ids
-}
-
-type ListSpaceInterceptors struct {
-	Interceptors []clientv2.RequestInterceptor
-}
-
-func (o ListSpaceInterceptors) Apply(options *ListSpaceOptions) {
-	options.interceptors = o.Interceptors
 }
 
 type RankingOptions struct {
@@ -89,67 +67,42 @@ type RankingOptions struct {
 	interceptors []clientv2.RequestInterceptor
 }
 
-type RankingOption interface {
-	Apply(options *RankingOptions)
-}
+type RankingOption func(options *RankingOptions)
 
 type RankingPagination struct {
 	Limit  int
 	Offset int
 }
 
-func RankingWithPagination(limit, offset int) RankingPagination {
-	return RankingPagination{
-		Limit:  limit,
-		Offset: offset,
+func RankingWithPagination(limit, offset int) RankingOption {
+	return func(options *RankingOptions) {
+		options.Limit = limit
+		options.Offset = offset
 	}
 }
 
-func (o RankingPagination) Apply(options *RankingOptions) {
-	options.Limit = o.Limit
-	options.Offset = o.Offset
-}
-
-type RankingCategoryOption struct {
-	Category string
-}
-
-func RankingWithCategory(cagegory string) RankingCategoryOption {
-	return RankingCategoryOption{
-		Category: cagegory,
+func RankingWithCategory(category string) RankingOption {
+	return func(options *RankingOptions) {
+		options.Category = category
 	}
 }
 
-func (o RankingCategoryOption) Apply(options *RankingOptions) {
-	options.Category = o.Category
-}
-
-type RankingNetworkOption struct {
-	Network string
-}
-
-func RankingWithNetwork(network string) RankingNetworkOption {
-	return RankingNetworkOption{
-		Network: network,
+func RankingWithNetwork(network string) RankingOption {
+	return func(options *RankingOptions) {
+		options.Network = network
 	}
 }
 
-func (o RankingNetworkOption) Apply(options *RankingOptions) {
-	options.Network = o.Network
-}
-
-type RankingInterceptors struct {
-	Interceptors []clientv2.RequestInterceptor
-}
-
-func (o RankingInterceptors) Apply(options *RankingOptions) {
-	options.interceptors = o.Interceptors
+func RankingWithInterceptors(interceptors []clientv2.RequestInterceptor) RankingOption {
+	return func(options *RankingOptions) {
+		options.interceptors = interceptors
+	}
 }
 
 func (s *SDK) ListSpace(ctx context.Context, opts ...ListSpaceOption) ([]*client.SpaceFragment, error) {
 	options := defaultListSpaceOptions
 	for _, opt := range opts {
-		opt.Apply(&options)
+		opt(&options)
 	}
 
 	list, err := wrapError(s.client.ListSpaces(ctx, int64(options.Offset), int64(options.Limit), options.IDs, options.interceptors...))
@@ -163,7 +116,7 @@ func (s *SDK) ListSpace(ctx context.Context, opts ...ListSpaceOption) ([]*client
 func (s *SDK) GetRanking(ctx context.Context, opts ...RankingOption) ([]string, error) {
 	options := defaultRankingOptions
 	for _, opt := range opts {
-		opt.Apply(&options)
+		opt(&options)
 	}
 
 	list, err := wrapError(s.client.ListRanking(ctx, int64(options.Offset), int64(options.Limit), options.Category, options.Network, options.interceptors...))

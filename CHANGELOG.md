@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added sdk methods for fetching votes
+- Added id_in parameter for fetching proposals
+
+### Changed
+- Changed structure for request options - it's func now
 
 ## [0.1.1] - 2023-07-06
 
