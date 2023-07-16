@@ -63,7 +63,7 @@ func TestClient(t *testing.T) {
 	})
 
 	convey.Convey("ListVotes", t, func() {
-		list, err := c.ListVotes(context.Background(), []*string{helpers.Ptr("0x108a9e597560c4f249cd8be23acd409059fcd17bb2290d69a550ac2232676e7d")}, 0, 10, "created", OrderDirectionDesc)
+		list, err := c.ListVotes(context.Background(), []*string{helpers.Ptr("0x108a9e597560c4f249cd8be23acd409059fcd17bb2290d69a550ac2232676e7d")}, 0, 10, "created", OrderDirectionDesc, 0)
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(list.GetVotes(), convey.ShouldHaveLength, 10)

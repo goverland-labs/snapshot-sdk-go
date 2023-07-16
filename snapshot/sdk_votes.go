@@ -76,7 +76,7 @@ func (s *SDK) ListVotes(ctx context.Context, opts ...ListVotesOption) ([]*client
 		opt(&options)
 	}
 
-	list, err := wrapError(s.client.ListVotes(ctx, options.ProposalIDs, int64(options.Offset), int64(options.Limit), options.OrderBy, options.OrderDirection, options.interceptors...))
+	list, err := wrapError(s.client.ListVotes(ctx, options.ProposalIDs, int64(options.Offset), int64(options.Limit), options.OrderBy, options.OrderDirection, options.CreatedAfter, options.interceptors...))
 	if err != nil {
 		return nil, err
 	}

@@ -16,7 +16,7 @@ type SnapshotClient interface {
 	ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error)
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
-	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
+	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
 }
 
 type Client struct {
@@ -1176,8 +1176,8 @@ func (c *Client) SpaceByID(ctx context.Context, id string, interceptors ...clien
 	return &res, nil
 }
 
-const ListVotesDocument = `query ListVotes ($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
-	votes(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in:$proposals}) {
+const ListVotesDocument = `query ListVotes ($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!, $createdAfter: Int!) {
+	votes(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in:$proposals,created_gte:$createdAfter}) {
 		... VoteFragment
 	}
 }
@@ -1208,13 +1208,14 @@ fragment ProposalIdentifierFragment on Proposal {
 }
 `
 
-func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error) {
+func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error) {
 	vars := map[string]interface{}{
 		"proposals":      proposals,
 		"skip":           skip,
 		"first":          first,
 		"orderBy":        orderBy,
 		"orderDirection": orderDirection,
+		"createdAfter":   createdAfter,
 	}
 
 	var res ListVotes

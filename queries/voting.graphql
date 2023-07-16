@@ -1,5 +1,5 @@
-query ListVotes($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
-    votes (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in: $proposals}) {
+query ListVotes($proposals: [String], $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!, $createdAfter: Int!) {
+    votes (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {proposal_in: $proposals, created_gte: $createdAfter}) {
         ... VoteFragment
     }
 }
