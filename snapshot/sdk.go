@@ -26,7 +26,12 @@ func NewSDK(opts ...Option) *SDK {
 		options.httpClient = http.DefaultClient
 	}
 
+	interceptors := options.interceptors
+	if options.apiKey != "" {
+		interceptors = append(interceptors, ApiKeyInterceptor(options.apiKey))
+	}
+
 	return &SDK{
-		client: client.NewClient(options.httpClient, options.baseURL, options.options, options.interceptors...),
+		client: client.NewClient(options.httpClient, options.baseURL, options.options, interceptors...),
 	}
 }

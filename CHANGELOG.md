@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added SDK option for passing the API Key
+
+### Changed
+- Changed tests for proposals (move tests to right place)
+
 ## [0.2.1] - 2023-07-16
 
 ### Added
