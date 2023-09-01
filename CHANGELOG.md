@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Mark votes choice field as json.RawMessage due to multiple values
+
 ## [0.3.0] - 2023-08-23
 
 ### Added
