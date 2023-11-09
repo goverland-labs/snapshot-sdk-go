@@ -6,10 +6,19 @@ import (
 	"github.com/goverland-labs/sdk-snapshot-go/client"
 )
 
-const ProductionHub = "https://hub.snapshot.org/graphql"
+const (
+	ProductionHub      = "https://hub.snapshot.org/graphql"
+	ProductionScoreURL = "https://score.snapshot.org/"
+	ProductionSeqURL   = "https://seq.snapshot.org/"
+)
 
 type SDK struct {
 	client client.SnapshotClient
+
+	// TODO setup options
+	scoreURL   string
+	seqURL     string
+	httpClient *http.Client
 }
 
 func NewSDK(opts ...Option) *SDK {
@@ -32,6 +41,9 @@ func NewSDK(opts ...Option) *SDK {
 	}
 
 	return &SDK{
-		client: client.NewClient(options.httpClient, options.baseURL, options.options, interceptors...),
+		client:     client.NewClient(options.httpClient, options.baseURL, options.options, interceptors...),
+		scoreURL:   ProductionScoreURL,
+		seqURL:     ProductionSeqURL,
+		httpClient: options.httpClient,
 	}
 }
