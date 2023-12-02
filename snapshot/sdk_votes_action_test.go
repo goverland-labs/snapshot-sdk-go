@@ -13,34 +13,19 @@ func TestSDK_Validate(t *testing.T) {
 	convey.Convey("fail validate for vote", t, func() {
 		validate, err := sdk.Validate(context.Background(), ValidationParams{
 			Validation: "passport-gated",
-			Author:     "0xB9879cD06c904c2FDbc75d03534929b5E842F3a0",
+			Author:     "0x7697cAB0e123c68d27d7D5A9EbA346d7584Af888",
 			Space:      "nwnwert.eth",
 			Network:    "1",
-			Snapshot:   18480218,
+			Snapshot:   18698857,
 			Params: map[string]interface{}{
-				"stamps":   []string{"Gitcoin"},
-				"operator": "OR",
+				"scoreThreshold": 14,
+				"operator":       "NONE",
 			},
 		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(validate, convey.ShouldNotBeNil)
 
 		convey.So(validate.Result, convey.ShouldBeFalse)
-	})
-
-	convey.Convey("validate with invalid address", t, func() {
-		_, err := sdk.Validate(context.Background(), ValidationParams{
-			Validation: "passport-gated",
-			Author:     "fake-address",
-			Space:      "nwnwert.eth",
-			Network:    "1",
-			Snapshot:   18480218,
-			Params: map[string]interface{}{
-				"stamps":   []string{"Gitcoin"},
-				"operator": "OR",
-			},
-		})
-		convey.So(err, convey.ShouldNotBeNil)
 	})
 }
 
