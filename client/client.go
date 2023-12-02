@@ -18,6 +18,7 @@ type SnapshotClient interface {
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
 	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
+	GetVotingPower(ctx context.Context, voter string, space string, proposal string, interceptors ...clientv2.RequestInterceptor) (*GetVotingPower, error)
 }
 
 type Client struct {
@@ -736,6 +737,31 @@ func (t *VoteFragment) GetVpState() *string {
 	return t.VpState
 }
 
+type VotingPowerFragment struct {
+	Vp           *float64   "json:\"vp,omitempty\" graphql:\"vp\""
+	VpByStrategy []*float64 "json:\"vp_by_strategy,omitempty\" graphql:\"vp_by_strategy\""
+	VpState      *string    "json:\"vp_state,omitempty\" graphql:\"vp_state\""
+}
+
+func (t *VotingPowerFragment) GetVp() *float64 {
+	if t == nil {
+		t = &VotingPowerFragment{}
+	}
+	return t.Vp
+}
+func (t *VotingPowerFragment) GetVpByStrategy() []*float64 {
+	if t == nil {
+		t = &VotingPowerFragment{}
+	}
+	return t.VpByStrategy
+}
+func (t *VotingPowerFragment) GetVpState() *string {
+	if t == nil {
+		t = &VotingPowerFragment{}
+	}
+	return t.VpState
+}
+
 type ListRanking_Ranking struct {
 	Items []*SpaceIdentifierFragment "json:\"items,omitempty\" graphql:\"items\""
 }
@@ -822,6 +848,17 @@ func (t *ListVotes) GetVotes() []*VoteFragment {
 		t = &ListVotes{}
 	}
 	return t.Votes
+}
+
+type GetVotingPower struct {
+	Vp *VotingPowerFragment "json:\"vp,omitempty\" graphql:\"vp\""
+}
+
+func (t *GetVotingPower) GetVp() *VotingPowerFragment {
+	if t == nil {
+		t = &GetVotingPower{}
+	}
+	return t.Vp
 }
 
 const ListNetworksDocument = `query ListNetworks {
@@ -1221,6 +1258,33 @@ func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64,
 
 	var res ListVotes
 	if err := c.Client.Post(ctx, "ListVotes", ListVotesDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetVotingPowerDocument = `query GetVotingPower ($voter: String!, $space: String!, $proposal: String!) {
+	vp(voter: $voter, space: $space, proposal: $proposal) {
+		... VotingPowerFragment
+	}
+}
+fragment VotingPowerFragment on Vp {
+	vp
+	vp_by_strategy
+	vp_state
+}
+`
+
+func (c *Client) GetVotingPower(ctx context.Context, voter string, space string, proposal string, interceptors ...clientv2.RequestInterceptor) (*GetVotingPower, error) {
+	vars := map[string]interface{}{
+		"voter":    voter,
+		"space":    space,
+		"proposal": proposal,
+	}
+
+	var res GetVotingPower
+	if err := c.Client.Post(ctx, "GetVotingPower", GetVotingPowerDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 

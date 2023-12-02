@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/goverland-labs/sdk-snapshot-go/client"
 )
 
 type ValidationParams struct {
@@ -23,28 +25,15 @@ type ValidationResponse struct {
 }
 
 type GetVotingPowerParams struct {
-	Address    string             `json:"address"`
-	Network    string             `json:"network"`
-	Strategies []StrategyFragment `json:"strategies"`
-	Snapshot   any                `json:"snapshot"` // int or 'latest'
-	Space      string             `json:"space"`
-	Delegation bool               `json:"delegation"`
+	Voter    string `json:"voter"`
+	Space    string `json:"space"`
+	Proposal string `json:"proposal"`
 }
 
 type StrategyFragment struct {
 	Name    string                 `json:"name"`
 	Network *string                `json:"network,omitempty"`
 	Params  map[string]interface{} `json:"params"`
-}
-
-type GetVotingPowerResponse struct {
-	Result VotingPower `json:"result"`
-}
-
-type VotingPower struct {
-	VP           float64   `json:"vp"`
-	VPByStrategy []float64 `json:"vp_by_strategy"`
-	VpState      string    `json:"vp_state"`
 }
 
 type VoteParams struct {
@@ -85,19 +74,13 @@ func (s *SDK) Validate(_ context.Context, params ValidationParams) (ValidationRe
 	return result, nil
 }
 
-func (s *SDK) GetVotingPower(_ context.Context, params GetVotingPowerParams) (GetVotingPowerResponse, error) {
-	resp, err := s.doJSONRPCRequest("get_vp", params)
+func (s *SDK) GetVotingPower(ctx context.Context, params GetVotingPowerParams) (*client.VotingPowerFragment, error) {
+	vp, err := wrapError(s.client.GetVotingPower(ctx, params.Voter, params.Space, params.Proposal))
 	if err != nil {
-		return GetVotingPowerResponse{}, err
+		return nil, err
 	}
 
-	var result GetVotingPowerResponse
-	err = json.Unmarshal(resp, &result)
-	if err != nil {
-		return GetVotingPowerResponse{}, err
-	}
-
-	return result, nil
+	return vp.GetVp(), nil
 }
 
 func (s *SDK) Vote(_ context.Context, params VoteParams) (VoteResult, error) {
