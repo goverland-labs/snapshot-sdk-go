@@ -4,6 +4,12 @@ query ListVotes($proposals: [String], $skip: Int!, $first: Int!, $orderBy: Strin
     }
 }
 
+query GetVotingPower($voter: String!, $space: String!, $proposal: String!) {
+    vp (voter: $voter, space: $space, proposal: $proposal) {
+        ... VotingPowerFragment
+    }
+}
+
 fragment SpaceVotingFragment on SpaceVoting {
     delay
     period
@@ -30,6 +36,12 @@ fragment VoteFragment on Vote {
     metadata
     reason
     app
+    vp
+    vp_by_strategy
+    vp_state
+}
+
+fragment VotingPowerFragment on Vp {
     vp
     vp_by_strategy
     vp_state
