@@ -2,6 +2,7 @@ package snapshot
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
@@ -82,4 +83,21 @@ func (s *SDK) ListVotes(ctx context.Context, opts ...ListVotesOption) ([]*client
 	}
 
 	return list.GetVotes(), nil
+}
+
+func (s *SDK) VoteByID(ctx context.Context, id string) (*client.VoteFragment, error) {
+	list, err := wrapError(s.client.VoteByID(ctx, id))
+	if err != nil {
+		return nil, err
+	}
+
+	votes := list.GetVotes()
+	if len(votes) == 0 {
+		return nil, nil
+	}
+	if len(votes) > 1 {
+		return nil, errors.New("more than one vote returned")
+	}
+
+	return votes[0], nil
 }

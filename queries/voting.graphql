@@ -4,6 +4,12 @@ query ListVotes($proposals: [String], $skip: Int!, $first: Int!, $orderBy: Strin
     }
 }
 
+query VoteByID($voteId: String!) {
+    votes (first: 1, skip: 0, where: {id: $voteId}) {
+        ... VoteFragment
+    }
+}
+
 query GetVotingPower($voter: String!, $space: String!, $proposal: String!) {
     vp (voter: $voter, space: $space, proposal: $proposal) {
         ... VotingPowerFragment

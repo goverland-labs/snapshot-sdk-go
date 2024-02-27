@@ -18,6 +18,7 @@ type SnapshotClient interface {
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
 	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
+	VoteByID(ctx context.Context, voteID string, interceptors ...clientv2.RequestInterceptor) (*VoteByID, error)
 	GetVotingPower(ctx context.Context, voter string, space string, proposal string, interceptors ...clientv2.RequestInterceptor) (*GetVotingPower, error)
 }
 
@@ -850,6 +851,17 @@ func (t *ListVotes) GetVotes() []*VoteFragment {
 	return t.Votes
 }
 
+type VoteByID struct {
+	Votes []*VoteFragment "json:\"votes,omitempty\" graphql:\"votes\""
+}
+
+func (t *VoteByID) GetVotes() []*VoteFragment {
+	if t == nil {
+		t = &VoteByID{}
+	}
+	return t.Votes
+}
+
 type GetVotingPower struct {
 	Vp *VotingPowerFragment "json:\"vp,omitempty\" graphql:\"vp\""
 }
@@ -1258,6 +1270,51 @@ func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64,
 
 	var res ListVotes
 	if err := c.Client.Post(ctx, "ListVotes", ListVotesDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const VoteByIDDocument = `query VoteByID ($voteId: String!) {
+	votes(first: 1, skip: 0, where: {id:$voteId}) {
+		... VoteFragment
+	}
+}
+fragment VoteFragment on Vote {
+	id
+	ipfs
+	voter
+	created
+	space {
+		... SpaceIdentifierFragment
+	}
+	proposal {
+		... ProposalIdentifierFragment
+	}
+	choice
+	metadata
+	reason
+	app
+	vp
+	vp_by_strategy
+	vp_state
+}
+fragment SpaceIdentifierFragment on Space {
+	id
+}
+fragment ProposalIdentifierFragment on Proposal {
+	id
+}
+`
+
+func (c *Client) VoteByID(ctx context.Context, voteID string, interceptors ...clientv2.RequestInterceptor) (*VoteByID, error) {
+	vars := map[string]interface{}{
+		"voteId": voteID,
+	}
+
+	var res VoteByID
+	if err := c.Client.Post(ctx, "VoteByID", VoteByIDDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
