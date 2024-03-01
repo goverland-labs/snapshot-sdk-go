@@ -91,6 +91,8 @@ type MessageWhere struct {
 	MciGte       *int64    `json:"mci_gte,omitempty"`
 	MciLt        *int64    `json:"mci_lt,omitempty"`
 	MciLte       *int64    `json:"mci_lte,omitempty"`
+	Address      *string   `json:"address,omitempty"`
+	AddressIn    []*string `json:"address_in,omitempty"`
 	Timestamp    *int64    `json:"timestamp,omitempty"`
 	TimestampIn  []*int64  `json:"timestamp_in,omitempty"`
 	TimestampGt  *int64    `json:"timestamp_gt,omitempty"`
@@ -113,6 +115,7 @@ type Proposal struct {
 	Ipfs             *string                `json:"ipfs,omitempty"`
 	Author           string                 `json:"author"`
 	Created          int64                  `json:"created"`
+	Updated          *int64                 `json:"updated,omitempty"`
 	Space            *Space                 `json:"space,omitempty"`
 	Network          string                 `json:"network"`
 	Symbol           string                 `json:"symbol"`
@@ -168,6 +171,12 @@ type ProposalWhere struct {
 	CreatedGte         *int64    `json:"created_gte,omitempty"`
 	CreatedLt          *int64    `json:"created_lt,omitempty"`
 	CreatedLte         *int64    `json:"created_lte,omitempty"`
+	Updated            *int64    `json:"updated,omitempty"`
+	UpdatedIn          []*int64  `json:"updated_in,omitempty"`
+	UpdatedGt          *int64    `json:"updated_gt,omitempty"`
+	UpdatedGte         *int64    `json:"updated_gte,omitempty"`
+	UpdatedLt          *int64    `json:"updated_lt,omitempty"`
+	UpdatedLte         *int64    `json:"updated_lte,omitempty"`
 	Start              *int64    `json:"start,omitempty"`
 	StartIn            []*int64  `json:"start_in,omitempty"`
 	StartGt            *int64    `json:"start_gt,omitempty"`
@@ -184,6 +193,7 @@ type ProposalWhere struct {
 	ScoresStateIn      []*string `json:"scores_state_in,omitempty"`
 	State              *string   `json:"state,omitempty"`
 	SpaceVerified      *bool     `json:"space_verified,omitempty"`
+	Flagged            *bool     `json:"flagged,omitempty"`
 }
 
 type RankingObject struct {
@@ -197,6 +207,15 @@ type RankingWhere struct {
 	Search   *string   `json:"search,omitempty"`
 	Category *string   `json:"category,omitempty"`
 	Network  *string   `json:"network,omitempty"`
+}
+
+type Role struct {
+	Space       *string   `json:"space,omitempty"`
+	Permissions []*string `json:"permissions,omitempty"`
+}
+
+type RolesWhere struct {
+	Address *string `json:"address,omitempty"`
 }
 
 type Space struct {
@@ -241,7 +260,10 @@ type Space struct {
 	Template         *string                `json:"template,omitempty"`
 	Verified         *bool                  `json:"verified,omitempty"`
 	Flagged          *bool                  `json:"flagged,omitempty"`
+	Hibernated       *bool                  `json:"hibernated,omitempty"`
+	Turbo            *bool                  `json:"turbo,omitempty"`
 	Rank             *float64               `json:"rank,omitempty"`
+	Created          int64                  `json:"created"`
 }
 
 type SpaceFilters struct {
@@ -261,8 +283,14 @@ type SpaceVoting struct {
 }
 
 type SpaceWhere struct {
-	ID   *string   `json:"id,omitempty"`
-	IDIn []*string `json:"id_in,omitempty"`
+	ID         *string   `json:"id,omitempty"`
+	IDIn       []*string `json:"id_in,omitempty"`
+	Created    *int64    `json:"created,omitempty"`
+	CreatedIn  []*int64  `json:"created_in,omitempty"`
+	CreatedGt  *int64    `json:"created_gt,omitempty"`
+	CreatedGte *int64    `json:"created_gte,omitempty"`
+	CreatedLt  *int64    `json:"created_lt,omitempty"`
+	CreatedLte *int64    `json:"created_lte,omitempty"`
 }
 
 type Statement struct {

@@ -39,6 +39,7 @@ type Query struct {
 	Vote          *Vote           "json:\"vote,omitempty\" graphql:\"vote\""
 	Votes         []*Vote         "json:\"votes,omitempty\" graphql:\"votes\""
 	Aliases       []*Alias        "json:\"aliases,omitempty\" graphql:\"aliases\""
+	Roles         []*Role         "json:\"roles,omitempty\" graphql:\"roles\""
 	Follows       []*Follow       "json:\"follows,omitempty\" graphql:\"follows\""
 	Subscriptions []*Subscription "json:\"subscriptions,omitempty\" graphql:\"subscriptions\""
 	Users         []*User         "json:\"users,omitempty\" graphql:\"users\""
