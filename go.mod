@@ -1,4 +1,4 @@
-module github.com/goverland-labs/sdk-snapshot-go
+module github.com/goverland-labs/snapshot-sdk-go
 
 go 1.20
 

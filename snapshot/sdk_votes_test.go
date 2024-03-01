@@ -6,7 +6,7 @@ import (
 
 	"github.com/smartystreets/goconvey/convey"
 
-	"github.com/goverland-labs/sdk-snapshot-go/client"
+	"github.com/goverland-labs/snapshot-sdk-go/client"
 )
 
 func TestGettingVotes(t *testing.T) {

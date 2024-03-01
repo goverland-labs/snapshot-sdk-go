@@ -8,8 +8,8 @@ import (
 
 	"github.com/Yamashou/gqlgenc/clientv2"
 
-	"github.com/goverland-labs/sdk-snapshot-go/client"
-	"github.com/goverland-labs/sdk-snapshot-go/helpers"
+	"github.com/goverland-labs/snapshot-sdk-go/client"
+	"github.com/goverland-labs/snapshot-sdk-go/helpers"
 )
 
 var ErrProposalNotFound = errors.New("proposal not found")
