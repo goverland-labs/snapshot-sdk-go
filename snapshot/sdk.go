@@ -3,7 +3,7 @@ package snapshot
 import (
 	"net/http"
 
-	"github.com/goverland-labs/sdk-snapshot-go/client"
+	"github.com/goverland-labs/snapshot-sdk-go/client"
 )
 
 const (

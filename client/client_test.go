@@ -9,7 +9,7 @@ import (
 	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/smartystreets/goconvey/convey"
 
-	"github.com/goverland-labs/sdk-snapshot-go/helpers"
+	"github.com/goverland-labs/snapshot-sdk-go/helpers"
 )
 
 const snapshotHub = "https://hub.snapshot.org/graphql"
