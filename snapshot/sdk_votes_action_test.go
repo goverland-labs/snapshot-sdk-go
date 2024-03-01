@@ -32,7 +32,8 @@ func TestSDK_Validate(t *testing.T) {
 func TestSDK_GetVotingPower(t *testing.T) {
 	sdk := NewSDK()
 
-	convey.Convey("success get voting power", t, func() {
+	// This test for manual checking only because it's based on the proposal in Snapshot's database
+	convey.SkipConvey("success get voting power", t, func() {
 		vp, err := sdk.GetVotingPower(context.Background(), GetVotingPowerParams{
 			Voter:    "0x7697cAB0e123c68d27d7D5A9EbA346d7584Af888",
 			Space:    "nwnwert.eth",
