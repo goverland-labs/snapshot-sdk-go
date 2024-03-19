@@ -1,0 +1,18 @@
+query ListMessages($mci: Int!, $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
+    messages (first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {mci_gt: $mci}) {
+        ... MessageFragment
+    }
+}
+
+fragment MessageFragment on Message {
+    mci
+    id
+    ipfs
+    address
+    version
+    timestamp
+    space
+    type
+    sig
+    receipt
+}
