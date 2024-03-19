@@ -11,6 +11,7 @@ import (
 )
 
 type SnapshotClient interface {
+	ListMessages(ctx context.Context, mci int64, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListMessages, error)
 	ListNetworks(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNetworks, error)
 	ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, ids []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error)
 	ProposalByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*ProposalByID, error)
@@ -55,6 +56,80 @@ type Query struct {
 	Vp            *Vp             "json:\"vp,omitempty\" graphql:\"vp\""
 	Messages      []*Message      "json:\"messages,omitempty\" graphql:\"messages\""
 }
+type MessageFragment struct {
+	Mci       *int64  "json:\"mci,omitempty\" graphql:\"mci\""
+	ID        *string "json:\"id,omitempty\" graphql:\"id\""
+	Ipfs      *string "json:\"ipfs,omitempty\" graphql:\"ipfs\""
+	Address   *string "json:\"address,omitempty\" graphql:\"address\""
+	Version   *string "json:\"version,omitempty\" graphql:\"version\""
+	Timestamp *int64  "json:\"timestamp,omitempty\" graphql:\"timestamp\""
+	Space     *string "json:\"space,omitempty\" graphql:\"space\""
+	Type      *string "json:\"type,omitempty\" graphql:\"type\""
+	Sig       *string "json:\"sig,omitempty\" graphql:\"sig\""
+	Receipt   *string "json:\"receipt,omitempty\" graphql:\"receipt\""
+}
+
+func (t *MessageFragment) GetMci() *int64 {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Mci
+}
+func (t *MessageFragment) GetID() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.ID
+}
+func (t *MessageFragment) GetIpfs() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Ipfs
+}
+func (t *MessageFragment) GetAddress() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Address
+}
+func (t *MessageFragment) GetVersion() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Version
+}
+func (t *MessageFragment) GetTimestamp() *int64 {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Timestamp
+}
+func (t *MessageFragment) GetSpace() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Space
+}
+func (t *MessageFragment) GetType() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Type
+}
+func (t *MessageFragment) GetSig() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Sig
+}
+func (t *MessageFragment) GetReceipt() *string {
+	if t == nil {
+		t = &MessageFragment{}
+	}
+	return t.Receipt
+}
+
 type NetworkFragment struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -775,6 +850,17 @@ func (t *ListRanking_Ranking) GetItems() []*SpaceIdentifierFragment {
 	return t.Items
 }
 
+type ListMessages struct {
+	Messages []*MessageFragment "json:\"messages,omitempty\" graphql:\"messages\""
+}
+
+func (t *ListMessages) GetMessages() []*MessageFragment {
+	if t == nil {
+		t = &ListMessages{}
+	}
+	return t.Messages
+}
+
 type ListNetworks struct {
 	Networks []*NetworkFragment "json:\"networks,omitempty\" graphql:\"networks\""
 }
@@ -872,6 +958,42 @@ func (t *GetVotingPower) GetVp() *VotingPowerFragment {
 		t = &GetVotingPower{}
 	}
 	return t.Vp
+}
+
+const ListMessagesDocument = `query ListMessages ($mci: Int!, $skip: Int!, $first: Int!, $orderBy: String!, $orderDirection: OrderDirection!) {
+	messages(first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection, where: {mci_gt:$mci}) {
+		... MessageFragment
+	}
+}
+fragment MessageFragment on Message {
+	mci
+	id
+	ipfs
+	address
+	version
+	timestamp
+	space
+	type
+	sig
+	receipt
+}
+`
+
+func (c *Client) ListMessages(ctx context.Context, mci int64, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListMessages, error) {
+	vars := map[string]interface{}{
+		"mci":            mci,
+		"skip":           skip,
+		"first":          first,
+		"orderBy":        orderBy,
+		"orderDirection": orderDirection,
+	}
+
+	var res ListMessages
+	if err := c.Client.Post(ctx, "ListMessages", ListMessagesDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 const ListNetworksDocument = `query ListNetworks {

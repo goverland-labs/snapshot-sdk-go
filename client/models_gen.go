@@ -33,6 +33,11 @@ type AliasWhere struct {
 	CreatedLte *int64    `json:"created_lte,omitempty"`
 }
 
+type BoostSettings struct {
+	Enabled      *bool `json:"enabled,omitempty"`
+	BribeEnabled *bool `json:"bribeEnabled,omitempty"`
+}
+
 type DelegationPortal struct {
 	DelegationType     string `json:"delegationType"`
 	DelegationContract string `json:"delegationContract"`
@@ -263,6 +268,7 @@ type Space struct {
 	Hibernated       *bool                  `json:"hibernated,omitempty"`
 	Turbo            *bool                  `json:"turbo,omitempty"`
 	Rank             *float64               `json:"rank,omitempty"`
+	Boost            *BoostSettings         `json:"boost,omitempty"`
 	Created          int64                  `json:"created"`
 }
 
