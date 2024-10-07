@@ -131,7 +131,7 @@ type Proposal {
   end: Int!
   quorum: Float!
   privacy: String
-  snapshot: String
+  snapshot: Int!
   state: String
   link: String
   app: String

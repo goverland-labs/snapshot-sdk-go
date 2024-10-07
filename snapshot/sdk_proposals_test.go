@@ -31,11 +31,11 @@ func TestGettingProposals(t *testing.T) {
 	})
 
 	convey.Convey("get proposal by id", t, func() {
-		proposal, err := sdk.GetProposalByID(context.Background(), "0x108a9e597560c4f249cd8be23acd409059fcd17bb2290d69a550ac2232676e7d")
+		proposal, err := sdk.GetProposalByID(context.Background(), "0x279400a2606220c19f8cd407e5fc82101c46a8bae546b36212cff2e0d359a35c")
 
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(proposal, convey.ShouldNotBeNil)
-		convey.So(proposal.ID, convey.ShouldEqual, "0x108a9e597560c4f249cd8be23acd409059fcd17bb2290d69a550ac2232676e7d")
+		convey.So(proposal.ID, convey.ShouldEqual, "0x279400a2606220c19f8cd407e5fc82101c46a8bae546b36212cff2e0d359a35c")
 	})
 
 	convey.Convey("list proposals by IDs", t, func() {

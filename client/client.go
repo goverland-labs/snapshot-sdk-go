@@ -159,7 +159,7 @@ type ProposalFragment struct {
 	End           int64                    "json:\"end\" graphql:\"end\""
 	Quorum        float64                  "json:\"quorum\" graphql:\"quorum\""
 	Privacy       *string                  "json:\"privacy,omitempty\" graphql:\"privacy\""
-	Snapshot      *string                  "json:\"snapshot,omitempty\" graphql:\"snapshot\""
+	Snapshot      *int64                   "json:\"snapshot,omitempty\" graphql:\"snapshot\""
 	State         *string                  "json:\"state,omitempty\" graphql:\"state\""
 	Link          *string                  "json:\"link,omitempty\" graphql:\"link\""
 	App           *string                  "json:\"app,omitempty\" graphql:\"app\""
@@ -274,7 +274,7 @@ func (t *ProposalFragment) GetPrivacy() *string {
 	}
 	return t.Privacy
 }
-func (t *ProposalFragment) GetSnapshot() *string {
+func (t *ProposalFragment) GetSnapshot() *int64 {
 	if t == nil {
 		t = &ProposalFragment{}
 	}
