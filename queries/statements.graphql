@@ -1,0 +1,32 @@
+query ListStatements(
+    $space: String!
+    $delegates: [String!]
+    $skip: Int!
+    $first: Int!
+) {
+    statements(
+        first: $first
+        skip: $skip
+        where: {
+            space: $space
+            delegate_in: $delegates
+        }
+    ) {
+        ...StatementFragment
+    }
+}
+
+fragment StatementFragment on Statement {
+    id
+    ipfs
+    network
+    about
+    delegate
+    statement
+    status
+    source
+    created
+    updated
+    space
+    discourse
+}

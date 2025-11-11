@@ -4,6 +4,6 @@ query ListNetworks {
     }
 }
 
-fragment NetworkFragment on Item {
+fragment NetworkFragment on Network {
     id
 }

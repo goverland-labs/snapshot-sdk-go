@@ -1,0 +1,18 @@
+query ListUsers(
+    $addresses: [String!]
+) {
+    users(
+        where: {
+            id_in: $addresses
+        }
+    ) {
+        ...UserFragment
+    }
+}
+
+fragment UserFragment on User {
+    id
+    about
+    ipfs
+    avatar
+}
