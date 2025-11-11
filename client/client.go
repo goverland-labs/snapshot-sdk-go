@@ -4,6 +4,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
@@ -822,7 +823,7 @@ type VoteFragment struct {
 	Created      int64                       "json:\"created\" graphql:\"created\""
 	Space        *SpaceIdentifierFragment    "json:\"space\" graphql:\"space\""
 	Proposal     *ProposalIdentifierFragment "json:\"proposal,omitempty\" graphql:\"proposal\""
-	Choice       map[string]interface{}      "json:\"choice\" graphql:\"choice\""
+	Choice       json.RawMessage             "json:\"choice\" graphql:\"choice\""
 	Metadata     map[string]interface{}      "json:\"metadata,omitempty\" graphql:\"metadata\""
 	Reason       *string                     "json:\"reason,omitempty\" graphql:\"reason\""
 	App          *string                     "json:\"app,omitempty\" graphql:\"app\""
@@ -867,7 +868,7 @@ func (t *VoteFragment) GetProposal() *ProposalIdentifierFragment {
 	}
 	return t.Proposal
 }
-func (t *VoteFragment) GetChoice() map[string]any {
+func (t *VoteFragment) GetChoice() json.RawMessage {
 	if t == nil {
 		t = &VoteFragment{}
 	}
