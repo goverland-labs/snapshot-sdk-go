@@ -10,7 +10,7 @@ import (
 func TestGettingUsers(t *testing.T) {
 	sdk := NewSDK()
 
-	convey.Convey("list statements", t, func() {
+	convey.Convey("user about info", t, func() {
 		list, err := sdk.ListUsers(context.Background(), []string{
 			"0x06aD51E6CC8AEaFcc0aAf2df6Dc7870d365dd8E1",
 			"0xd5D171a9AA125AF13216C3213B5A9Fc793FcCF2c",
