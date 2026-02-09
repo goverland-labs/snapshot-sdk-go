@@ -18,6 +18,8 @@ type SnapshotClient interface {
 	ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error)
 	ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error)
 	SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error)
+	ListStatements(ctx context.Context, space string, delegates []string, skip int64, first int64, interceptors ...clientv2.RequestInterceptor) (*ListStatements, error)
+	ListUsers(ctx context.Context, addresses []string, interceptors ...clientv2.RequestInterceptor) (*ListUsers, error)
 	ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error)
 	VoteByID(ctx context.Context, voteID string, interceptors ...clientv2.RequestInterceptor) (*VoteByID, error)
 	GetVotingPower(ctx context.Context, voter string, space string, proposal string, interceptors ...clientv2.RequestInterceptor) (*GetVotingPower, error)
@@ -31,31 +33,6 @@ func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, inte
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
-type Query struct {
-	Space         *Space          "json:\"space,omitempty\" graphql:\"space\""
-	Spaces        []*Space        "json:\"spaces,omitempty\" graphql:\"spaces\""
-	Ranking       *RankingObject  "json:\"ranking,omitempty\" graphql:\"ranking\""
-	Proposal      *Proposal       "json:\"proposal,omitempty\" graphql:\"proposal\""
-	Proposals     []*Proposal     "json:\"proposals,omitempty\" graphql:\"proposals\""
-	Vote          *Vote           "json:\"vote,omitempty\" graphql:\"vote\""
-	Votes         []*Vote         "json:\"votes,omitempty\" graphql:\"votes\""
-	Aliases       []*Alias        "json:\"aliases,omitempty\" graphql:\"aliases\""
-	Roles         []*Role         "json:\"roles,omitempty\" graphql:\"roles\""
-	Follows       []*Follow       "json:\"follows,omitempty\" graphql:\"follows\""
-	Subscriptions []*Subscription "json:\"subscriptions,omitempty\" graphql:\"subscriptions\""
-	Users         []*User         "json:\"users,omitempty\" graphql:\"users\""
-	Statements    []*Statement    "json:\"statements,omitempty\" graphql:\"statements\""
-	User          *User           "json:\"user,omitempty\" graphql:\"user\""
-	Statement     *Statement      "json:\"statement,omitempty\" graphql:\"statement\""
-	Skins         []*Item         "json:\"skins,omitempty\" graphql:\"skins\""
-	Networks      []*Item         "json:\"networks,omitempty\" graphql:\"networks\""
-	Validations   []*Item         "json:\"validations,omitempty\" graphql:\"validations\""
-	Plugins       []*Item         "json:\"plugins,omitempty\" graphql:\"plugins\""
-	Strategies    []*StrategyItem "json:\"strategies,omitempty\" graphql:\"strategies\""
-	Strategy      *StrategyItem   "json:\"strategy,omitempty\" graphql:\"strategy\""
-	Vp            *Vp             "json:\"vp,omitempty\" graphql:\"vp\""
-	Messages      []*Message      "json:\"messages,omitempty\" graphql:\"messages\""
-}
 type MessageFragment struct {
 	Mci       *int64  "json:\"mci,omitempty\" graphql:\"mci\""
 	ID        *string "json:\"id,omitempty\" graphql:\"id\""
@@ -591,6 +568,94 @@ func (t *SpaceIdentifierFragment) GetID() string {
 	return t.ID
 }
 
+type StatementFragment struct {
+	ID        string  "json:\"id\" graphql:\"id\""
+	Ipfs      string  "json:\"ipfs\" graphql:\"ipfs\""
+	Network   *string "json:\"network,omitempty\" graphql:\"network\""
+	About     *string "json:\"about,omitempty\" graphql:\"about\""
+	Delegate  *string "json:\"delegate,omitempty\" graphql:\"delegate\""
+	Statement *string "json:\"statement,omitempty\" graphql:\"statement\""
+	Status    *string "json:\"status,omitempty\" graphql:\"status\""
+	Source    *string "json:\"source,omitempty\" graphql:\"source\""
+	Created   int64   "json:\"created\" graphql:\"created\""
+	Updated   int64   "json:\"updated\" graphql:\"updated\""
+	Space     string  "json:\"space\" graphql:\"space\""
+	Discourse *string "json:\"discourse,omitempty\" graphql:\"discourse\""
+}
+
+func (t *StatementFragment) GetID() string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.ID
+}
+func (t *StatementFragment) GetIpfs() string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Ipfs
+}
+func (t *StatementFragment) GetNetwork() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Network
+}
+func (t *StatementFragment) GetAbout() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.About
+}
+func (t *StatementFragment) GetDelegate() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Delegate
+}
+func (t *StatementFragment) GetStatement() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Statement
+}
+func (t *StatementFragment) GetStatus() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Status
+}
+func (t *StatementFragment) GetSource() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Source
+}
+func (t *StatementFragment) GetCreated() int64 {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Created
+}
+func (t *StatementFragment) GetUpdated() int64 {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Updated
+}
+func (t *StatementFragment) GetSpace() string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Space
+}
+func (t *StatementFragment) GetDiscourse() *string {
+	if t == nil {
+		t = &StatementFragment{}
+	}
+	return t.Discourse
+}
+
 type StrategyFragment struct {
 	Name    string                 "json:\"name\" graphql:\"name\""
 	Network *string                "json:\"network,omitempty\" graphql:\"network\""
@@ -609,7 +674,7 @@ func (t *StrategyFragment) GetNetwork() *string {
 	}
 	return t.Network
 }
-func (t *StrategyFragment) GetParams() map[string]interface{} {
+func (t *StrategyFragment) GetParams() map[string]any {
 	if t == nil {
 		t = &StrategyFragment{}
 	}
@@ -641,6 +706,38 @@ func (t *TreasuryFragment) GetNetwork() *string {
 	return t.Network
 }
 
+type UserFragment struct {
+	ID     string  "json:\"id\" graphql:\"id\""
+	About  *string "json:\"about,omitempty\" graphql:\"about\""
+	Ipfs   *string "json:\"ipfs,omitempty\" graphql:\"ipfs\""
+	Avatar *string "json:\"avatar,omitempty\" graphql:\"avatar\""
+}
+
+func (t *UserFragment) GetID() string {
+	if t == nil {
+		t = &UserFragment{}
+	}
+	return t.ID
+}
+func (t *UserFragment) GetAbout() *string {
+	if t == nil {
+		t = &UserFragment{}
+	}
+	return t.About
+}
+func (t *UserFragment) GetIpfs() *string {
+	if t == nil {
+		t = &UserFragment{}
+	}
+	return t.Ipfs
+}
+func (t *UserFragment) GetAvatar() *string {
+	if t == nil {
+		t = &UserFragment{}
+	}
+	return t.Avatar
+}
+
 type ValidationFragment struct {
 	Name   string                 "json:\"name\" graphql:\"name\""
 	Params map[string]interface{} "json:\"params,omitempty\" graphql:\"params\""
@@ -652,7 +749,7 @@ func (t *ValidationFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *ValidationFragment) GetParams() map[string]interface{} {
+func (t *ValidationFragment) GetParams() map[string]any {
 	if t == nil {
 		t = &ValidationFragment{}
 	}
@@ -777,7 +874,7 @@ func (t *VoteFragment) GetChoice() json.RawMessage {
 	}
 	return t.Choice
 }
-func (t *VoteFragment) GetMetadata() map[string]interface{} {
+func (t *VoteFragment) GetMetadata() map[string]any {
 	if t == nil {
 		t = &VoteFragment{}
 	}
@@ -927,6 +1024,28 @@ func (t *SpaceByID) GetSpaces() []*SpaceFragment {
 	return t.Spaces
 }
 
+type ListStatements struct {
+	Statements []*StatementFragment "json:\"statements,omitempty\" graphql:\"statements\""
+}
+
+func (t *ListStatements) GetStatements() []*StatementFragment {
+	if t == nil {
+		t = &ListStatements{}
+	}
+	return t.Statements
+}
+
+type ListUsers struct {
+	Users []*UserFragment "json:\"users,omitempty\" graphql:\"users\""
+}
+
+func (t *ListUsers) GetUsers() []*UserFragment {
+	if t == nil {
+		t = &ListUsers{}
+	}
+	return t.Users
+}
+
 type ListVotes struct {
 	Votes []*VoteFragment "json:\"votes,omitempty\" graphql:\"votes\""
 }
@@ -980,7 +1099,7 @@ fragment MessageFragment on Message {
 `
 
 func (c *Client) ListMessages(ctx context.Context, mci int64, skip int64, first int64, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListMessages, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"mci":            mci,
 		"skip":           skip,
 		"first":          first,
@@ -990,6 +1109,10 @@ func (c *Client) ListMessages(ctx context.Context, mci int64, skip int64, first 
 
 	var res ListMessages
 	if err := c.Client.Post(ctx, "ListMessages", ListMessagesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1001,16 +1124,20 @@ const ListNetworksDocument = `query ListNetworks {
 		... NetworkFragment
 	}
 }
-fragment NetworkFragment on Item {
+fragment NetworkFragment on Network {
 	id
 }
 `
 
 func (c *Client) ListNetworks(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNetworks, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res ListNetworks
 	if err := c.Client.Post(ctx, "ListNetworks", ListNetworksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1073,7 +1200,7 @@ fragment SpaceIdentifierFragment on Space {
 `
 
 func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, createdAfter int64, spaces []*string, ids []*string, orderBy string, orderDirection OrderDirection, interceptors ...clientv2.RequestInterceptor) (*ListProposals, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"skip":           skip,
 		"first":          first,
 		"createdAfter":   createdAfter,
@@ -1085,6 +1212,10 @@ func (c *Client) ListProposals(ctx context.Context, skip int64, first int64, cre
 
 	var res ListProposals
 	if err := c.Client.Post(ctx, "ListProposals", ListProposalsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1147,12 +1278,16 @@ fragment SpaceIdentifierFragment on Space {
 `
 
 func (c *Client) ProposalByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*ProposalByID, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
 	var res ProposalByID
 	if err := c.Client.Post(ctx, "ProposalByID", ProposalByIDDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1172,7 +1307,7 @@ fragment SpaceIdentifierFragment on Space {
 `
 
 func (c *Client) ListRanking(ctx context.Context, skip int64, first int64, category string, network string, interceptors ...clientv2.RequestInterceptor) (*ListRanking, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"skip":     skip,
 		"first":    first,
 		"category": category,
@@ -1181,6 +1316,10 @@ func (c *Client) ListRanking(ctx context.Context, skip int64, first int64, categ
 
 	var res ListRanking
 	if err := c.Client.Post(ctx, "ListRanking", ListRankingDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1255,7 +1394,7 @@ fragment StrategyFragment on Strategy {
 `
 
 func (c *Client) ListSpaces(ctx context.Context, skip int64, first int64, ids []*string, interceptors ...clientv2.RequestInterceptor) (*ListSpaces, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"skip":  skip,
 		"first": first,
 		"ids":   ids,
@@ -1263,6 +1402,10 @@ func (c *Client) ListSpaces(ctx context.Context, skip int64, first int64, ids []
 
 	var res ListSpaces
 	if err := c.Client.Post(ctx, "ListSpaces", ListSpacesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1337,12 +1480,87 @@ fragment StrategyFragment on Strategy {
 `
 
 func (c *Client) SpaceByID(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*SpaceByID, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
 	var res SpaceByID
 	if err := c.Client.Post(ctx, "SpaceByID", SpaceByIDDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListStatementsDocument = `query ListStatements ($space: String!, $delegates: [String!], $skip: Int!, $first: Int!) {
+	statements(first: $first, skip: $skip, where: {space:$space,delegate_in:$delegates}) {
+		... StatementFragment
+	}
+}
+fragment StatementFragment on Statement {
+	id
+	ipfs
+	network
+	about
+	delegate
+	statement
+	status
+	source
+	created
+	updated
+	space
+	discourse
+}
+`
+
+func (c *Client) ListStatements(ctx context.Context, space string, delegates []string, skip int64, first int64, interceptors ...clientv2.RequestInterceptor) (*ListStatements, error) {
+	vars := map[string]any{
+		"space":     space,
+		"delegates": delegates,
+		"skip":      skip,
+		"first":     first,
+	}
+
+	var res ListStatements
+	if err := c.Client.Post(ctx, "ListStatements", ListStatementsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const ListUsersDocument = `query ListUsers ($addresses: [String!]) {
+	users(where: {id_in:$addresses}) {
+		... UserFragment
+	}
+}
+fragment UserFragment on User {
+	id
+	about
+	ipfs
+	avatar
+}
+`
+
+func (c *Client) ListUsers(ctx context.Context, addresses []string, interceptors ...clientv2.RequestInterceptor) (*ListUsers, error) {
+	vars := map[string]any{
+		"addresses": addresses,
+	}
+
+	var res ListUsers
+	if err := c.Client.Post(ctx, "ListUsers", ListUsersDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1382,7 +1600,7 @@ fragment ProposalIdentifierFragment on Proposal {
 `
 
 func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64, first int64, orderBy string, orderDirection OrderDirection, createdAfter int64, interceptors ...clientv2.RequestInterceptor) (*ListVotes, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"proposals":      proposals,
 		"skip":           skip,
 		"first":          first,
@@ -1393,6 +1611,10 @@ func (c *Client) ListVotes(ctx context.Context, proposals []*string, skip int64,
 
 	var res ListVotes
 	if err := c.Client.Post(ctx, "ListVotes", ListVotesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1432,12 +1654,16 @@ fragment ProposalIdentifierFragment on Proposal {
 `
 
 func (c *Client) VoteByID(ctx context.Context, voteID string, interceptors ...clientv2.RequestInterceptor) (*VoteByID, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"voteId": voteID,
 	}
 
 	var res VoteByID
 	if err := c.Client.Post(ctx, "VoteByID", VoteByIDDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -1457,7 +1683,7 @@ fragment VotingPowerFragment on Vp {
 `
 
 func (c *Client) GetVotingPower(ctx context.Context, voter string, space string, proposal string, interceptors ...clientv2.RequestInterceptor) (*GetVotingPower, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"voter":    voter,
 		"space":    space,
 		"proposal": proposal,
@@ -1465,8 +1691,27 @@ func (c *Client) GetVotingPower(ctx context.Context, voter string, space string,
 
 	var res GetVotingPower
 	if err := c.Client.Post(ctx, "GetVotingPower", GetVotingPowerDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
 	return &res, nil
+}
+
+var DocumentOperationNames = map[string]string{
+	ListMessagesDocument:   "ListMessages",
+	ListNetworksDocument:   "ListNetworks",
+	ListProposalsDocument:  "ListProposals",
+	ProposalByIDDocument:   "ProposalByID",
+	ListRankingDocument:    "ListRanking",
+	ListSpacesDocument:     "ListSpaces",
+	SpaceByIDDocument:      "SpaceByID",
+	ListStatementsDocument: "ListStatements",
+	ListUsersDocument:      "ListUsers",
+	ListVotesDocument:      "ListVotes",
+	VoteByIDDocument:       "VoteByID",
+	GetVotingPowerDocument: "GetVotingPower",
 }

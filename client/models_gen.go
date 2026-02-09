@@ -3,6 +3,7 @@
 package client
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -41,6 +42,7 @@ type BoostSettings struct {
 type DelegationPortal struct {
 	DelegationType     string `json:"delegationType"`
 	DelegationContract string `json:"delegationContract"`
+	DelegationNetwork  string `json:"delegationNetwork"`
 	DelegationAPI      string `json:"delegationApi"`
 }
 
@@ -48,7 +50,8 @@ type Follow struct {
 	ID       string  `json:"id"`
 	Ipfs     *string `json:"ipfs,omitempty"`
 	Follower string  `json:"follower"`
-	Space    Space   `json:"space"`
+	Space    *Space  `json:"space"`
+	Network  string  `json:"network"`
 	Created  int64   `json:"created"`
 }
 
@@ -61,6 +64,8 @@ type FollowWhere struct {
 	FollowerIn []*string `json:"follower_in,omitempty"`
 	Space      *string   `json:"space,omitempty"`
 	SpaceIn    []*string `json:"space_in,omitempty"`
+	Network    *string   `json:"network,omitempty"`
+	NetworkIn  []*string `json:"network_in,omitempty"`
 	Created    *int64    `json:"created,omitempty"`
 	CreatedIn  []*int64  `json:"created_in,omitempty"`
 	CreatedGt  *int64    `json:"created_gt,omitempty"`
@@ -72,6 +77,48 @@ type FollowWhere struct {
 type Item struct {
 	ID          string `json:"id"`
 	SpacesCount *int64 `json:"spacesCount,omitempty"`
+}
+
+type Label struct {
+	ID          *string `json:"id,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Color       *string `json:"color,omitempty"`
+}
+
+type Leaderboard struct {
+	Space          *string `json:"space,omitempty"`
+	User           *string `json:"user,omitempty"`
+	ProposalsCount *int64  `json:"proposalsCount,omitempty"`
+	VotesCount     *int64  `json:"votesCount,omitempty"`
+	LastVote       *int64  `json:"lastVote,omitempty"`
+}
+
+type LeaderboardsWhere struct {
+	Space              *string   `json:"space,omitempty"`
+	SpaceIn            []*string `json:"space_in,omitempty"`
+	SpaceNot           *string   `json:"space_not,omitempty"`
+	SpaceNotIn         []*string `json:"space_not_in,omitempty"`
+	User               *string   `json:"user,omitempty"`
+	UserIn             []*string `json:"user_in,omitempty"`
+	UserNot            *string   `json:"user_not,omitempty"`
+	UserNotIn          []*string `json:"user_not_in,omitempty"`
+	ProposalCount      *int64    `json:"proposal_count,omitempty"`
+	ProposalCountIn    []*int64  `json:"proposal_count_in,omitempty"`
+	ProposalCountNot   *int64    `json:"proposal_count_not,omitempty"`
+	ProposalCountNotIn []*int64  `json:"proposal_count_not_in,omitempty"`
+	ProposalCountGt    []*int64  `json:"proposal_count_gt,omitempty"`
+	ProposalCountGte   []*int64  `json:"proposal_count_gte,omitempty"`
+	ProposalCountLt    []*int64  `json:"proposal_count_lt,omitempty"`
+	ProposalCountLte   []*int64  `json:"proposal_count_lte,omitempty"`
+	VoteCount          *int64    `json:"vote_count,omitempty"`
+	VoteCountIn        []*int64  `json:"vote_count_in,omitempty"`
+	VoteCountNot       *int64    `json:"vote_count_not,omitempty"`
+	VoteCountNotIn     []*int64  `json:"vote_count_not_in,omitempty"`
+	VoteCountGt        []*int64  `json:"vote_count_gt,omitempty"`
+	VoteCountGte       []*int64  `json:"vote_count_gte,omitempty"`
+	VoteCountLt        []*int64  `json:"vote_count_lt,omitempty"`
+	VoteCountLte       []*int64  `json:"vote_count_lte,omitempty"`
 }
 
 type Message struct {
@@ -115,90 +162,122 @@ type Metrics struct {
 	Categories map[string]interface{} `json:"categories,omitempty"`
 }
 
+type Network struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Premium     *bool  `json:"premium,omitempty"`
+	SpacesCount *int64 `json:"spacesCount,omitempty"`
+}
+
+type Option struct {
+	Name  *string `json:"name,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
 type Proposal struct {
-	ID               string                 `json:"id"`
-	Ipfs             *string                `json:"ipfs,omitempty"`
-	Author           string                 `json:"author"`
-	Created          int64                  `json:"created"`
-	Updated          *int64                 `json:"updated,omitempty"`
-	Space            *Space                 `json:"space,omitempty"`
-	Network          string                 `json:"network"`
-	Symbol           string                 `json:"symbol"`
-	Type             *string                `json:"type,omitempty"`
-	Strategies       []*Strategy            `json:"strategies"`
-	Validation       *Validation            `json:"validation,omitempty"`
-	Plugins          map[string]interface{} `json:"plugins"`
-	Title            string                 `json:"title"`
-	Body             *string                `json:"body,omitempty"`
-	Discussion       string                 `json:"discussion"`
-	Choices          []*string              `json:"choices"`
-	Start            int64                  `json:"start"`
-	End              int64                  `json:"end"`
-	Quorum           float64                `json:"quorum"`
-	Privacy          *string                `json:"privacy,omitempty"`
-	Snapshot         *string                `json:"snapshot,omitempty"`
-	State            *string                `json:"state,omitempty"`
-	Link             *string                `json:"link,omitempty"`
-	App              *string                `json:"app,omitempty"`
-	Scores           []*float64             `json:"scores,omitempty"`
-	ScoresByStrategy map[string]interface{} `json:"scores_by_strategy,omitempty"`
-	ScoresState      *string                `json:"scores_state,omitempty"`
-	ScoresTotal      *float64               `json:"scores_total,omitempty"`
-	ScoresUpdated    *int64                 `json:"scores_updated,omitempty"`
-	Votes            *int64                 `json:"votes,omitempty"`
-	Flagged          *bool                  `json:"flagged,omitempty"`
+	ID                string                 `json:"id"`
+	Ipfs              *string                `json:"ipfs,omitempty"`
+	Author            string                 `json:"author"`
+	Created           int64                  `json:"created"`
+	Updated           *int64                 `json:"updated,omitempty"`
+	Space             *Space                 `json:"space,omitempty"`
+	Network           string                 `json:"network"`
+	Symbol            string                 `json:"symbol"`
+	Type              *string                `json:"type,omitempty"`
+	Strategies        []*Strategy            `json:"strategies"`
+	Validation        *Validation            `json:"validation,omitempty"`
+	Plugins           map[string]interface{} `json:"plugins"`
+	Title             string                 `json:"title"`
+	Body              *string                `json:"body,omitempty"`
+	Discussion        string                 `json:"discussion"`
+	Choices           []*string              `json:"choices"`
+	Labels            []*string              `json:"labels"`
+	Start             int64                  `json:"start"`
+	End               int64                  `json:"end"`
+	Quorum            float64                `json:"quorum"`
+	QuorumType        string                 `json:"quorumType"`
+	Privacy           *string                `json:"privacy,omitempty"`
+	Snapshot          *int64                 `json:"snapshot,omitempty"`
+	State             *string                `json:"state,omitempty"`
+	Link              *string                `json:"link,omitempty"`
+	App               *string                `json:"app,omitempty"`
+	Scores            []*float64             `json:"scores,omitempty"`
+	ScoresByStrategy  map[string]interface{} `json:"scores_by_strategy,omitempty"`
+	ScoresState       *string                `json:"scores_state,omitempty"`
+	ScoresTotal       *float64               `json:"scores_total,omitempty"`
+	ScoresUpdated     *int64                 `json:"scores_updated,omitempty"`
+	ScoresTotalValue  *float64               `json:"scores_total_value,omitempty"`
+	VpValueByStrategy map[string]interface{} `json:"vp_value_by_strategy,omitempty"`
+	Votes             *int64                 `json:"votes,omitempty"`
+	Flagged           *bool                  `json:"flagged,omitempty"`
+	FlagCode          *int64                 `json:"flagCode,omitempty"`
 }
 
 type ProposalWhere struct {
-	ID                 *string   `json:"id,omitempty"`
-	IDIn               []*string `json:"id_in,omitempty"`
-	Ipfs               *string   `json:"ipfs,omitempty"`
-	IpfsIn             []*string `json:"ipfs_in,omitempty"`
-	Space              *string   `json:"space,omitempty"`
-	SpaceIn            []*string `json:"space_in,omitempty"`
-	Author             *string   `json:"author,omitempty"`
-	AuthorIn           []*string `json:"author_in,omitempty"`
-	Network            *string   `json:"network,omitempty"`
-	NetworkIn          []*string `json:"network_in,omitempty"`
-	TitleContains      *string   `json:"title_contains,omitempty"`
-	StrategiesContains *string   `json:"strategies_contains,omitempty"`
-	PluginsContains    *string   `json:"plugins_contains,omitempty"`
-	Validation         *string   `json:"validation,omitempty"`
-	Type               *string   `json:"type,omitempty"`
-	TypeIn             []*string `json:"type_in,omitempty"`
-	App                *string   `json:"app,omitempty"`
-	AppNot             *string   `json:"app_not,omitempty"`
-	AppIn              []*string `json:"app_in,omitempty"`
-	AppNotIn           []*string `json:"app_not_in,omitempty"`
-	Created            *int64    `json:"created,omitempty"`
-	CreatedIn          []*int64  `json:"created_in,omitempty"`
-	CreatedGt          *int64    `json:"created_gt,omitempty"`
-	CreatedGte         *int64    `json:"created_gte,omitempty"`
-	CreatedLt          *int64    `json:"created_lt,omitempty"`
-	CreatedLte         *int64    `json:"created_lte,omitempty"`
-	Updated            *int64    `json:"updated,omitempty"`
-	UpdatedIn          []*int64  `json:"updated_in,omitempty"`
-	UpdatedGt          *int64    `json:"updated_gt,omitempty"`
-	UpdatedGte         *int64    `json:"updated_gte,omitempty"`
-	UpdatedLt          *int64    `json:"updated_lt,omitempty"`
-	UpdatedLte         *int64    `json:"updated_lte,omitempty"`
-	Start              *int64    `json:"start,omitempty"`
-	StartIn            []*int64  `json:"start_in,omitempty"`
-	StartGt            *int64    `json:"start_gt,omitempty"`
-	StartGte           *int64    `json:"start_gte,omitempty"`
-	StartLt            *int64    `json:"start_lt,omitempty"`
-	StartLte           *int64    `json:"start_lte,omitempty"`
-	End                *int64    `json:"end,omitempty"`
-	EndIn              []*int64  `json:"end_in,omitempty"`
-	EndGt              *int64    `json:"end_gt,omitempty"`
-	EndGte             *int64    `json:"end_gte,omitempty"`
-	EndLt              *int64    `json:"end_lt,omitempty"`
-	EndLte             *int64    `json:"end_lte,omitempty"`
-	ScoresState        *string   `json:"scores_state,omitempty"`
-	ScoresStateIn      []*string `json:"scores_state_in,omitempty"`
-	State              *string   `json:"state,omitempty"`
-	SpaceVerified      *bool     `json:"space_verified,omitempty"`
-	Flagged            *bool     `json:"flagged,omitempty"`
+	ID                  *string    `json:"id,omitempty"`
+	IDIn                []*string  `json:"id_in,omitempty"`
+	Ipfs                *string    `json:"ipfs,omitempty"`
+	IpfsIn              []*string  `json:"ipfs_in,omitempty"`
+	Space               *string    `json:"space,omitempty"`
+	SpaceIn             []*string  `json:"space_in,omitempty"`
+	Author              *string    `json:"author,omitempty"`
+	AuthorIn            []*string  `json:"author_in,omitempty"`
+	Network             *string    `json:"network,omitempty"`
+	NetworkIn           []*string  `json:"network_in,omitempty"`
+	TitleContains       *string    `json:"title_contains,omitempty"`
+	StrategiesContains  *string    `json:"strategies_contains,omitempty"`
+	PluginsContains     *string    `json:"plugins_contains,omitempty"`
+	Validation          *string    `json:"validation,omitempty"`
+	Type                *string    `json:"type,omitempty"`
+	TypeIn              []*string  `json:"type_in,omitempty"`
+	App                 *string    `json:"app,omitempty"`
+	AppNot              *string    `json:"app_not,omitempty"`
+	AppIn               []*string  `json:"app_in,omitempty"`
+	AppNotIn            []*string  `json:"app_not_in,omitempty"`
+	Created             *int64     `json:"created,omitempty"`
+	CreatedIn           []*int64   `json:"created_in,omitempty"`
+	CreatedGt           *int64     `json:"created_gt,omitempty"`
+	CreatedGte          *int64     `json:"created_gte,omitempty"`
+	CreatedLt           *int64     `json:"created_lt,omitempty"`
+	CreatedLte          *int64     `json:"created_lte,omitempty"`
+	Updated             *int64     `json:"updated,omitempty"`
+	UpdatedIn           []*int64   `json:"updated_in,omitempty"`
+	UpdatedGt           *int64     `json:"updated_gt,omitempty"`
+	UpdatedGte          *int64     `json:"updated_gte,omitempty"`
+	UpdatedLt           *int64     `json:"updated_lt,omitempty"`
+	UpdatedLte          *int64     `json:"updated_lte,omitempty"`
+	Start               *int64     `json:"start,omitempty"`
+	StartIn             []*int64   `json:"start_in,omitempty"`
+	StartGt             *int64     `json:"start_gt,omitempty"`
+	StartGte            *int64     `json:"start_gte,omitempty"`
+	StartLt             *int64     `json:"start_lt,omitempty"`
+	StartLte            *int64     `json:"start_lte,omitempty"`
+	End                 *int64     `json:"end,omitempty"`
+	EndIn               []*int64   `json:"end_in,omitempty"`
+	EndGt               *int64     `json:"end_gt,omitempty"`
+	EndGte              *int64     `json:"end_gte,omitempty"`
+	EndLt               *int64     `json:"end_lt,omitempty"`
+	EndLte              *int64     `json:"end_lte,omitempty"`
+	ScoresState         *string    `json:"scores_state,omitempty"`
+	ScoresStateIn       []*string  `json:"scores_state_in,omitempty"`
+	LabelsIn            []*string  `json:"labels_in,omitempty"`
+	State               *string    `json:"state,omitempty"`
+	SpaceVerified       *bool      `json:"space_verified,omitempty"`
+	Flagged             *bool      `json:"flagged,omitempty"`
+	Votes               *int64     `json:"votes,omitempty"`
+	VotesGt             *int64     `json:"votes_gt,omitempty"`
+	VotesGte            *int64     `json:"votes_gte,omitempty"`
+	VotesLt             *int64     `json:"votes_lt,omitempty"`
+	VotesLte            *int64     `json:"votes_lte,omitempty"`
+	ScoresTotalValue    *float64   `json:"scores_total_value,omitempty"`
+	ScoresTotalValueIn  []*float64 `json:"scores_total_value_in,omitempty"`
+	ScoresTotalValueGt  *float64   `json:"scores_total_value_gt,omitempty"`
+	ScoresTotalValueGte *float64   `json:"scores_total_value_gte,omitempty"`
+	ScoresTotalValueLt  *float64   `json:"scores_total_value_lt,omitempty"`
+	ScoresTotalValueLte *float64   `json:"scores_total_value_lte,omitempty"`
+}
+
+type Query struct {
 }
 
 type RankingObject struct {
@@ -207,11 +286,11 @@ type RankingObject struct {
 }
 
 type RankingWhere struct {
-	ID       *string   `json:"id,omitempty"`
-	IDIn     []*string `json:"id_in,omitempty"`
-	Search   *string   `json:"search,omitempty"`
-	Category *string   `json:"category,omitempty"`
-	Network  *string   `json:"network,omitempty"`
+	Search   *string `json:"search,omitempty"`
+	Category *string `json:"category,omitempty"`
+	Network  *string `json:"network,omitempty"`
+	Strategy *string `json:"strategy,omitempty"`
+	Plugin   *string `json:"plugin,omitempty"`
 }
 
 type Role struct {
@@ -220,56 +299,79 @@ type Role struct {
 }
 
 type RolesWhere struct {
-	Address *string `json:"address,omitempty"`
+	Address string `json:"address"`
+}
+
+type SkinSettings struct {
+	BgColor      *string `json:"bg_color,omitempty"`
+	LinkColor    *string `json:"link_color,omitempty"`
+	TextColor    *string `json:"text_color,omitempty"`
+	ContentColor *string `json:"content_color,omitempty"`
+	BorderColor  *string `json:"border_color,omitempty"`
+	HeadingColor *string `json:"heading_color,omitempty"`
+	HeaderColor  *string `json:"header_color,omitempty"`
+	PrimaryColor *string `json:"primary_color,omitempty"`
+	Theme        *string `json:"theme,omitempty"`
+	Logo         *string `json:"logo,omitempty"`
 }
 
 type Space struct {
-	ID               string                 `json:"id"`
-	Name             *string                `json:"name,omitempty"`
-	Private          *bool                  `json:"private,omitempty"`
-	About            *string                `json:"about,omitempty"`
-	Avatar           *string                `json:"avatar,omitempty"`
-	Terms            *string                `json:"terms,omitempty"`
-	Location         *string                `json:"location,omitempty"`
-	Website          *string                `json:"website,omitempty"`
-	Twitter          *string                `json:"twitter,omitempty"`
-	Github           *string                `json:"github,omitempty"`
-	Coingecko        *string                `json:"coingecko,omitempty"`
-	Email            *string                `json:"email,omitempty"`
-	Network          *string                `json:"network,omitempty"`
-	Symbol           *string                `json:"symbol,omitempty"`
-	Skin             *string                `json:"skin,omitempty"`
-	Domain           *string                `json:"domain,omitempty"`
-	Strategies       []*Strategy            `json:"strategies,omitempty"`
-	Admins           []*string              `json:"admins,omitempty"`
-	Members          []*string              `json:"members,omitempty"`
-	Moderators       []*string              `json:"moderators,omitempty"`
-	Filters          *SpaceFilters          `json:"filters,omitempty"`
-	Plugins          map[string]interface{} `json:"plugins,omitempty"`
-	Voting           *SpaceVoting           `json:"voting,omitempty"`
-	Categories       []*string              `json:"categories,omitempty"`
-	Validation       *Validation            `json:"validation,omitempty"`
-	VoteValidation   *Validation            `json:"voteValidation,omitempty"`
-	DelegationPortal *DelegationPortal      `json:"delegationPortal,omitempty"`
-	Treasuries       []*Treasury            `json:"treasuries,omitempty"`
-	ActiveProposals  *int64                 `json:"activeProposals,omitempty"`
-	ProposalsCount   *int64                 `json:"proposalsCount,omitempty"`
-	ProposalsCount7d *int64                 `json:"proposalsCount7d,omitempty"`
-	FollowersCount   *int64                 `json:"followersCount,omitempty"`
-	FollowersCount7d *int64                 `json:"followersCount7d,omitempty"`
-	VotesCount       *int64                 `json:"votesCount,omitempty"`
-	VotesCount7d     *int64                 `json:"votesCount7d,omitempty"`
-	Parent           *Space                 `json:"parent,omitempty"`
-	Children         []*Space               `json:"children,omitempty"`
-	Guidelines       *string                `json:"guidelines,omitempty"`
-	Template         *string                `json:"template,omitempty"`
-	Verified         *bool                  `json:"verified,omitempty"`
-	Flagged          *bool                  `json:"flagged,omitempty"`
-	Hibernated       *bool                  `json:"hibernated,omitempty"`
-	Turbo            *bool                  `json:"turbo,omitempty"`
-	Rank             *float64               `json:"rank,omitempty"`
-	Boost            *BoostSettings         `json:"boost,omitempty"`
-	Created          int64                  `json:"created"`
+	ID                string                 `json:"id"`
+	Name              *string                `json:"name,omitempty"`
+	Private           *bool                  `json:"private,omitempty"`
+	About             *string                `json:"about,omitempty"`
+	Avatar            *string                `json:"avatar,omitempty"`
+	Cover             *string                `json:"cover,omitempty"`
+	Terms             *string                `json:"terms,omitempty"`
+	Location          *string                `json:"location,omitempty"`
+	Website           *string                `json:"website,omitempty"`
+	Twitter           *string                `json:"twitter,omitempty"`
+	Github            *string                `json:"github,omitempty"`
+	Farcaster         *string                `json:"farcaster,omitempty"`
+	Coingecko         *string                `json:"coingecko,omitempty"`
+	Email             *string                `json:"email,omitempty"`
+	Discussions       *string                `json:"discussions,omitempty"`
+	DiscourseCategory *int64                 `json:"discourseCategory,omitempty"`
+	Network           *string                `json:"network,omitempty"`
+	Symbol            *string                `json:"symbol,omitempty"`
+	Skin              *string                `json:"skin,omitempty"`
+	SkinSettings      *SkinSettings          `json:"skinSettings,omitempty"`
+	Domain            *string                `json:"domain,omitempty"`
+	Strategies        []*Strategy            `json:"strategies,omitempty"`
+	Admins            []*string              `json:"admins,omitempty"`
+	Members           []*string              `json:"members,omitempty"`
+	Moderators        []*string              `json:"moderators,omitempty"`
+	Filters           *SpaceFilters          `json:"filters,omitempty"`
+	Plugins           map[string]interface{} `json:"plugins,omitempty"`
+	Voting            *SpaceVoting           `json:"voting,omitempty"`
+	Categories        []*string              `json:"categories,omitempty"`
+	Validation        *Validation            `json:"validation,omitempty"`
+	VoteValidation    *Validation            `json:"voteValidation,omitempty"`
+	DelegationPortal  *DelegationPortal      `json:"delegationPortal,omitempty"`
+	Treasuries        []*Treasury            `json:"treasuries,omitempty"`
+	Labels            []*Label               `json:"labels,omitempty"`
+	ActiveProposals   *int64                 `json:"activeProposals,omitempty"`
+	ProposalsCount    *int64                 `json:"proposalsCount,omitempty"`
+	ProposalsCount1d  *int64                 `json:"proposalsCount1d,omitempty"`
+	ProposalsCount7d  *int64                 `json:"proposalsCount7d,omitempty"`
+	ProposalsCount30d *int64                 `json:"proposalsCount30d,omitempty"`
+	FollowersCount    *int64                 `json:"followersCount,omitempty"`
+	FollowersCount7d  *int64                 `json:"followersCount7d,omitempty"`
+	VotesCount        *int64                 `json:"votesCount,omitempty"`
+	VotesCount7d      *int64                 `json:"votesCount7d,omitempty"`
+	Parent            *Space                 `json:"parent,omitempty"`
+	Children          []*Space               `json:"children,omitempty"`
+	Guidelines        *string                `json:"guidelines,omitempty"`
+	Template          *string                `json:"template,omitempty"`
+	Verified          *bool                  `json:"verified,omitempty"`
+	Flagged           *bool                  `json:"flagged,omitempty"`
+	FlagCode          *int64                 `json:"flagCode,omitempty"`
+	Hibernated        *bool                  `json:"hibernated,omitempty"`
+	Turbo             *bool                  `json:"turbo,omitempty"`
+	TurboExpiration   *int64                 `json:"turboExpiration,omitempty"`
+	Rank              *float64               `json:"rank,omitempty"`
+	Boost             *BoostSettings         `json:"boost,omitempty"`
+	Created           int64                  `json:"created"`
 }
 
 type SpaceFilters struct {
@@ -282,6 +384,7 @@ type SpaceVoting struct {
 	Period      *int64   `json:"period,omitempty"`
 	Type        *string  `json:"type,omitempty"`
 	Quorum      *float64 `json:"quorum,omitempty"`
+	QuorumType  string   `json:"quorumType"`
 	Blind       *bool    `json:"blind,omitempty"`
 	HideAbstain *bool    `json:"hideAbstain,omitempty"`
 	Privacy     *string  `json:"privacy,omitempty"`
@@ -297,15 +400,25 @@ type SpaceWhere struct {
 	CreatedGte *int64    `json:"created_gte,omitempty"`
 	CreatedLt  *int64    `json:"created_lt,omitempty"`
 	CreatedLte *int64    `json:"created_lte,omitempty"`
+	Strategy   *string   `json:"strategy,omitempty"`
+	Plugin     *string   `json:"plugin,omitempty"`
+	Controller *string   `json:"controller,omitempty"`
+	Verified   *bool     `json:"verified,omitempty"`
+	Domain     *string   `json:"domain,omitempty"`
+	Search     *string   `json:"search,omitempty"`
 }
 
 type Statement struct {
 	ID        string  `json:"id"`
 	Ipfs      string  `json:"ipfs"`
 	Space     string  `json:"space"`
+	Network   *string `json:"network,omitempty"`
 	About     *string `json:"about,omitempty"`
 	Delegate  *string `json:"delegate,omitempty"`
 	Statement *string `json:"statement,omitempty"`
+	Discourse *string `json:"discourse,omitempty"`
+	Status    *string `json:"status,omitempty"`
+	Source    *string `json:"source,omitempty"`
 	Created   int64   `json:"created"`
 	Updated   int64   `json:"updated"`
 }
@@ -317,6 +430,7 @@ type StatementsWhere struct {
 	IpfsIn     []*string `json:"ipfs_in,omitempty"`
 	Space      *string   `json:"space,omitempty"`
 	SpaceIn    []*string `json:"space_in,omitempty"`
+	Network    *string   `json:"network,omitempty"`
 	Delegate   *string   `json:"delegate,omitempty"`
 	DelegateIn []*string `json:"delegate_in,omitempty"`
 	Created    *int64    `json:"created,omitempty"`
@@ -325,6 +439,8 @@ type StatementsWhere struct {
 	CreatedGte *int64    `json:"created_gte,omitempty"`
 	CreatedLt  *int64    `json:"created_lt,omitempty"`
 	CreatedLte *int64    `json:"created_lte,omitempty"`
+	Source     *string   `json:"source,omitempty"`
+	SourceIn   []*string `json:"source_in,omitempty"`
 }
 
 type Strategy struct {
@@ -334,20 +450,24 @@ type Strategy struct {
 }
 
 type StrategyItem struct {
-	ID          string                   `json:"id"`
-	Author      *string                  `json:"author,omitempty"`
-	Version     *string                  `json:"version,omitempty"`
-	Schema      map[string]interface{}   `json:"schema,omitempty"`
-	Examples    []map[string]interface{} `json:"examples,omitempty"`
-	About       *string                  `json:"about,omitempty"`
-	SpacesCount *int64                   `json:"spacesCount,omitempty"`
+	ID                  string                   `json:"id"`
+	Name                *string                  `json:"name,omitempty"`
+	Author              *string                  `json:"author,omitempty"`
+	Version             *string                  `json:"version,omitempty"`
+	Schema              map[string]interface{}   `json:"schema,omitempty"`
+	Examples            []map[string]interface{} `json:"examples,omitempty"`
+	About               *string                  `json:"about,omitempty"`
+	SpacesCount         *int64                   `json:"spacesCount,omitempty"`
+	VerifiedSpacesCount *int64                   `json:"verifiedSpacesCount,omitempty"`
+	Override            *bool                    `json:"override,omitempty"`
+	Disabled            *bool                    `json:"disabled,omitempty"`
 }
 
 type Subscription struct {
 	ID      string  `json:"id"`
 	Ipfs    *string `json:"ipfs,omitempty"`
 	Address string  `json:"address"`
-	Space   Space   `json:"space"`
+	Space   *Space  `json:"space"`
 	Created int64   `json:"created"`
 }
 
@@ -375,12 +495,20 @@ type Treasury struct {
 }
 
 type User struct {
-	ID      string  `json:"id"`
-	Ipfs    *string `json:"ipfs,omitempty"`
-	Name    *string `json:"name,omitempty"`
-	About   *string `json:"about,omitempty"`
-	Avatar  *string `json:"avatar,omitempty"`
-	Created int64   `json:"created"`
+	ID             string  `json:"id"`
+	Ipfs           *string `json:"ipfs,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	About          *string `json:"about,omitempty"`
+	Avatar         *string `json:"avatar,omitempty"`
+	Cover          *string `json:"cover,omitempty"`
+	Github         *string `json:"github,omitempty"`
+	Twitter        *string `json:"twitter,omitempty"`
+	Lens           *string `json:"lens,omitempty"`
+	Farcaster      *string `json:"farcaster,omitempty"`
+	Created        *int64  `json:"created,omitempty"`
+	VotesCount     *int64  `json:"votesCount,omitempty"`
+	ProposalsCount *int64  `json:"proposalsCount,omitempty"`
+	LastVote       *int64  `json:"lastVote,omitempty"`
 }
 
 type UsersWhere struct {
@@ -406,7 +534,7 @@ type Vote struct {
 	Ipfs         *string                `json:"ipfs,omitempty"`
 	Voter        string                 `json:"voter"`
 	Created      int64                  `json:"created"`
-	Space        Space                  `json:"space"`
+	Space        *Space                 `json:"space"`
 	Proposal     *Proposal              `json:"proposal,omitempty"`
 	Choice       map[string]interface{} `json:"choice"`
 	Metadata     map[string]interface{} `json:"metadata,omitempty"`
@@ -482,7 +610,7 @@ func (e OrderDirection) String() string {
 	return string(e)
 }
 
-func (e *OrderDirection) UnmarshalGQL(v interface{}) error {
+func (e *OrderDirection) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -497,4 +625,18 @@ func (e *OrderDirection) UnmarshalGQL(v interface{}) error {
 
 func (e OrderDirection) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OrderDirection) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OrderDirection) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

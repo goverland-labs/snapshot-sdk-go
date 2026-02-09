@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-11-11
+
+### Added
+- Getting users by list of addresses
+- Getting statements by space and list of delegates
+
 ## [0.4.2] - 2024-10-07
 
 ### Changed
